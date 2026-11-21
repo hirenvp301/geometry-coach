@@ -145,6 +145,37 @@ svg text{font-family:Lexend,system-ui,sans-serif}
 .lhead a:hover{color:var(--ink)}
 .vis .fig{max-width:420px}
 .tt{border-collapse:collapse;font-size:14.5px;margin:6px 0}.tt th,.tt td{border:1px solid var(--line);padding:4px 10px;text-align:center}.tt th{background:#f3efe6}
+.examban{display:flex;align-items:center;gap:16px;width:100%;background:linear-gradient(90deg,#1d2433,#2d3a5c);color:#fff;border:0;border-radius:16px;padding:16px 18px;margin:0 0 22px;cursor:pointer;font-family:inherit;text-align:left}
+.examban .t{font-weight:600;font-size:16px}.examban .d{color:#c9d0e4;font-size:13.5px}
+.examban .exd{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:70px;height:62px;border-radius:12px;background:var(--a);font-size:12px;line-height:1.1}
+.examban .exd b{font-size:26px}
+.exampill{border-color:var(--a);color:#b04e0e;font-weight:600}.exampill.on{background:var(--a);border-color:var(--a);color:#fff}
+.countcard{display:flex;gap:20px;align-items:center}
+.bigd{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;height:110px;border-radius:14px;background:var(--a);color:#fff}
+.bigd b{font-size:40px;line-height:1}.bigd span{font-size:13px;margin-top:4px;text-align:center}
+.curwk td{background:#fff6ec}
+.testbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;background:var(--bg);padding:10px 0;margin-bottom:10px;border-bottom:1px solid var(--line)}
+.testbar>div:first-child{flex:1}
+.timer{font-variant-numeric:tabular-nums;font-weight:700;font-size:20px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px 12px}
+.timer.low{color:var(--bad);border-color:var(--bad)}
+.choice.sel{border-color:var(--accent);background:var(--accent-2)}
+.choice .lt{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#f1ede4;font-weight:600;font-size:13px;margin-right:6px}
+.choice.sel .lt{background:var(--accent);color:#fff}
+div.choice{cursor:default}
+.navgrid{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px}
+.navgrid button{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:500}
+.navgrid button.ans{background:#e6ebff;border-color:#b8c3f7}
+.navgrid button.flg{box-shadow:inset 0 0 0 2px var(--a)}
+.navgrid button.cur{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pvis{display:block!important;padding:0}
+.passage{max-height:520px;overflow:auto;padding:14px 16px;font-size:15px;line-height:1.7;text-align:left;width:100%}
+.passage .ptitle{font-weight:700;font-size:16px;margin-bottom:6px}
+.passage p{margin:0 0 10px}
+details.rev{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0}
+details.rev summary{cursor:pointer;font-weight:500}
+details.rev .mark{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;color:#fff;font-size:13px;margin-right:4px}
+details.rev.ok .mark{background:var(--good)}details.rev.no .mark{background:var(--bad)}
+@media (max-width:760px){.countcard{flex-direction:column;align-items:flex-start}.examban{flex-wrap:wrap}.testbar{flex-wrap:wrap}}
 @media (max-width:760px){.hero,.two{grid-template-columns:1fr}.tabs{margin-left:0;width:100%}.tab{flex:1;padding:8px 6px}h1{font-size:25px}.pills{margin-left:0}.card{padding:16px}}
 </style>
 </head>
@@ -300,7 +331,7 @@ const F=o=>`<div class="vis">${fig(o)}</div>`;
 function C(t,html,vis){return {t,b:()=>{const v=typeof vis==='function'?vis():vis;return v?`<div class="two"><div>${html}</div>${v.startsWith('<div')?v:`<div class="vis">${v}</div>`}</div>`:html;}};}
 /* lesson: code, title, desc, cards, [[skillName, gen], ...] */
 function L(code,title,desc,cards,skills,extra={}){return {id:code.replace('.','-'),code,title,desc,cards,skills:skills.map(([name,gen],i)=>({id:'s'+i,name,gen})),...extra};}
-function mc(prompt,choices,answer,steps,hint,extra={}){const ord=shuffle(choices.map((_,i)=>i));return {kind:'mc',prompt,choices:ord.map(i=>choices[i]),answer:ord.indexOf(answer),steps,hint,...extra};}
+function mc(prompt,choices,answer,steps,hint,extra={}){const rv=choices[answer];choices=choices.filter((v,i,A)=>A.indexOf(v)===i);answer=choices.indexOf(rv);if(choices.length>4){const o=choices.filter((_,i)=>i!==answer).slice(0,3);choices=[rv,...o];answer=0;}const ord=shuffle(choices.map((_,i)=>i));return {kind:'mc',prompt,choices:ord.map(i=>choices[i]),answer:ord.indexOf(answer),steps,hint,...extra};}
 function mcFixed(prompt,choices,answer,steps,hint,extra={}){return {kind:'mc',prompt,choices,answer,steps,hint,...extra};}
 function num(prompt,answer,steps,hint,extra={}){return {kind:'num',prompt,answer,steps,hint,...extra};}
 function multi(prompt,fields,steps,hint,extra={}){return {kind:'multi',prompt,fields:fields.map(([label,answer,tol])=>({label,answer,tol})),steps,hint,...extra};}
@@ -1977,6 +2008,277 @@ L('13.6','Probabilities of Mutually Exclusive Events','"Or" probabilities and co
 ],[['Mutually exclusive events & complements',genMutEx]])
 ]});
 
+/* ================= MCVSD EXAM PREP ================= */
+const EXAM_DATE=new Date(2027,0,9); // Saturday, January 9, 2027
+const EXAM_DATE_TXT='Saturday, January 9, 2027';
+const sup=n=>`<sup>${fmtN(n)}</sup>`;
+/* ---------- new 8th-grade math generators (multiple choice) ---------- */
+function mcNum(prompt,ans,wrongs,steps,hint,extra={}){const fmt=extra.fmt||(v=>fmtN(v));const seen=new Set([fmt(ans)]);const w=[];for(const v of wrongs){const s=fmt(v);if(!seen.has(s)){seen.add(s);w.push(s);}if(w.length===3)break;}
+  let k=1;while(w.length<3){const s=fmt(ans+k*(w.length%2?-1:1)*(1+w.length));if(!seen.has(s)){seen.add(s);w.push(s);}k++;}
+  return mc(prompt,[fmt(ans),...w],0,steps,hint,extra);}
+function genExponents(){const t=pick(['prod','quot','pow','neg','zero','mixed']);const b=pick([2,3,5,10]);
+  if(t==='prod'){const m=ri(2,5),n=ri(-2,4);const e=m+n;const v=b**e;
+    return mcNum(`Simplify: <span class="math">${b}${sup(m)} · ${b}${sup(n)}</span>`,e,[m*n,e+1,e-1],[`Product rule: same base → <b>add</b> the exponents.`,`${b}${sup(m)} · ${b}${sup(n)} = ${b}${sup(m+n)}`,`Answer: <b>${b}${sup(e)}</b>${e>=0&&e<=4?` = ${v}`:''}`],'When you multiply powers with the same base, add the exponents.',{fmt:v=>`${b}${sup(v)}`});}
+  if(t==='quot'){const m=ri(4,9),n=ri(1,m-1);const e=m-n;
+    return mcNum(`Simplify: <span class="math">${b}${sup(m)} ÷ ${b}${sup(n)}</span>`,e,[m+n,Math.round(m/n)||m+1,e+1],[`Quotient rule: same base → <b>subtract</b> the exponents.`,`${m} ${MINUS} ${n} = ${e}`,`Answer: <b>${b}${sup(e)}</b>`],'Dividing powers with the same base: subtract exponents.',{fmt:v=>`${b}${sup(v)}`});}
+  if(t==='pow'){const m=ri(2,4),n=ri(2,4);
+    return mcNum(`Simplify: <span class="math">(${b}${sup(m)})${sup(n)}</span>`,m*n,[m+n,m**n,m*n+1],[`Power of a power: <b>multiply</b> the exponents.`,`${m} · ${n} = ${m*n}`,`Answer: <b>${b}${sup(m*n)}</b>`],'Raising a power to a power: multiply the exponents.',{fmt:v=>`${b}${sup(v)}`});}
+  if(t==='neg'){const bb=pick([2,3,4,5]),n=ri(1,3);const den=bb**n;
+    return mc(`What is the value of <span class="math">${bb}${sup(-n)}</span>?`,[fracH(1,den),fmtN(-den),fmtN(-bb*n),fracH(1,bb*n),String(den),MINUS+fracH(1,den)],0,[`A negative exponent means "one over": ${bb}${sup(-n)} = ${fracH(1,bb+sup(n))}`,`${bb}${sup(n)} = ${den}, so the answer is <b>${fracH(1,den)}</b>`],'Negative exponent → reciprocal. It does NOT make the number negative.');}
+  if(t==='zero'){const x=ri(2,99);return mc(`What is the value of <span class="math">${x}${sup(0)}</span>?`,['1','0',fmtN(x),'It cannot be determined'],0,[`Any nonzero number raised to the 0 power equals <b>1</b>.`],'Zero exponent rule.');}
+  const m=ri(2,4),n=ri(2,5),p=ri(1,m+n-1);const e=m+n-p;
+  return mcNum(`Simplify: <span class="math">${fracH(`x${sup(m)} · x${sup(n)}`,`x${sup(p)}`)}</span>`,e,[m*n-p,m+n+p,e+1],[`Top: x${sup(m)} · x${sup(n)} = x${sup(m+n)} (add)`,`Divide: x${sup(m+n)} ÷ x${sup(p)} = x${sup(m+n-p)} (subtract)`,`Answer: <b>x${sup(e)}</b>`],'Multiply → add exponents. Divide → subtract exponents.',{fmt:v=>`x${sup(v)}`});}
+const sci=(c,e)=>`${fm(c)} × 10${sup(e)}`;
+function genSciNot(){const t=pick(['to','from','mult','div','cmp']);
+  if(t==='to'){const c=r1(ri(11,99)/10),e=ri(3,8);const big=Math.round(c*10**e);
+    return mc(`Write <span class="math">${big.toLocaleString()}</span> in scientific notation.`,[sci(c,e),sci(c,e+1),sci(c,e-1),sci(c*10,e-1)],0,[`Move the decimal so there is one nonzero digit before it: ${fm(c)}`,`You moved it ${e} places left, so the exponent is ${e}.`,`<b>${sci(c,e)}</b>`],'The first number must be at least 1 and less than 10. Count the places the decimal moves.');}
+  if(t==='from'){const c=r1(ri(11,99)/10),e=-ri(2,5);const v=(c*10**e).toFixed(-e+1).replace(/0+$/,'');
+    return mc(`Write <span class="math">${sci(c,e)}</span> in standard form.`,[v,(c*10**(e-1)).toFixed(-e+2).replace(/0+$/,''),(c*10**(e+1)).toFixed(-e).replace(/0+$/,''),(c*10**(-e)).toLocaleString()],0,[`A negative exponent means a small number: move the decimal ${-e} places <b>left</b>.`,`<b>${v}</b>`],'Negative exponent → move the decimal left (the number gets smaller).');}
+  if(t==='mult'){let a=ri(11,49)/10,b=ri(11,39)/10;a=r1(a);b=r1(b);const m=ri(2,6),n=ri(2,6);let c=r2(a*b),e=m+n;if(c>=10){c=r2(c/10);e++;}
+    return mc(`Multiply: <span class="math">(${sci(a,m)})(${sci(b,n)})</span>`,[sci(c,e),sci(r2(a*b),m*n),sci(c,e+1),sci(r2(a+b),e)],0,[`Multiply the numbers: ${fm(a)} × ${fm(b)} = ${fm(r2(a*b))}`,`Add the exponents: 10${sup(m)} × 10${sup(n)} = 10${sup(m+n)}`,r2(a*b)>=10?`${fm(r2(a*b))} is not less than 10, so rewrite: ${sci(c,e)}`:`Result: ${sci(c,e)}`,`<b>${sci(c,e)}</b>`],'Multiply the front numbers, add the exponents, then fix the front number if it is 10 or more.');}
+  if(t==='div'){const c=ri(2,9),d=ri(2,4),m=ri(6,10),n=ri(2,5);const a=c*d;
+    return mc(`Divide: <span class="math">${fracH(sci(a,m),sci(d,n))}</span>`,[sci(c,m-n),sci(c,m+n),sci(c,Math.round(m/n)),sci(a-d,m-n),sci(c,n-m),sci(c+1,m-n)],0,[`Divide the numbers: ${a} ÷ ${d} = ${c}`,`Subtract the exponents: ${m} ${MINUS} ${n} = ${m-n}`,`<b>${sci(c,m-n)}</b>`],'Divide the front numbers, subtract the exponents.');}
+  const A=[r1(ri(11,99)/10),ri(3,9)];let B;do{B=[r1(ri(11,99)/10),ri(3,9)];}while(B[1]===A[1]&&B[0]===A[0]);const va=A[0]*10**A[1],vb=B[0]*10**B[1];
+  return mcFixed(`Which is greater: <span class="math">${sci(...A)}</span> or <span class="math">${sci(...B)}</span>?`,[sci(...A),sci(...B),'They are equal'],va>vb?0:1,[`Compare the exponents first: ${A[1]===B[1]?'they are the same, so compare the front numbers':`10${sup(A[1])} vs 10${sup(B[1])} — the bigger exponent wins`}.`,`<b>${va>vb?sci(...A):sci(...B)}</b> is greater.`],'Bigger exponent → bigger number (when both front numbers are between 1 and 10).');}
+function genRoots(){const t=pick(['sq','cube','est','irr','solve']);
+  if(t==='sq'){const n=ri(4,20);return mcNum(`What is <span class="math">√${n*n}</span>?`,n,[n*n/2,n+1,n-1,2*n],[`${n} × ${n} = ${n*n}, so √${n*n} = <b>${n}</b>`],'Which number times itself gives this?');}
+  if(t==='cube'){const n=ri(2,10)*pick([1,1,-1]);return mcNum(`What is <span class="math">∛${fmtN(n**3)}</span>?`,n,[n**3/3|0,-n,n+1,n*3],[`${par(n)} × ${par(n)} × ${par(n)} = ${fmtN(n**3)}`,`So ∛${fmtN(n**3)} = <b>${fmtN(n)}</b>`],'Which number used three times as a factor gives this? (Cube roots of negatives are negative.)');}
+  if(t==='est'){let n;do{n=ri(5,150);}while(Number.isInteger(Math.sqrt(n)));const lo=Math.floor(Math.sqrt(n));
+    return mc(`Between which two consecutive whole numbers is <span class="math">√${n}</span>?`,[`${lo} and ${lo+1}`,`${lo-1} and ${lo}`,`${lo+1} and ${lo+2}`,`${Math.floor(n/2)} and ${Math.floor(n/2)+1}`],0,[`Find the perfect squares around ${n}: ${lo}² = ${lo*lo} and ${lo+1}² = ${(lo+1)**2}.`,`${lo*lo} < ${n} < ${(lo+1)**2}, so √${n} is between <b>${lo} and ${lo+1}</b>.`],'List perfect squares: 1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144…');}
+  if(t==='irr'){const irr=pick(['√2','√15','π','√50']),rats=shuffle(['√49','0.75','−4','⅔','√100','0.3333…'].map(v=>v.replace('−',MINUS))).slice(0,3);
+    return mc(`Which number is <b>irrational</b>?`,[irr,...rats],0,[`A rational number can be written as a fraction (including terminating or repeating decimals and perfect-square roots).`,`<b>${irr}</b> cannot be written as a fraction — its decimal never ends or repeats.`],'Square roots of non-perfect squares, and π, are irrational.');}
+  const n=ri(2,12),k=pick([2,3]);const v=k===2?n*n:n**3;
+  return mc(`Solve: <span class="math">x${sup(k)} = ${v}</span>`,k===2?[`x = ±${n}`,`x = ${n}`,`x = ±${n*2}`,`x = ${v}`,`x = ±${v/2}`]:[`x = ${n}`,`x = ±${n}`,`x = ${n*3}`,`x = ${v}`,`x = ${v/3|0}`],0,[k===2?`Take the square root of both sides — remember both the positive and negative roots: <b>x = ±${n}</b>`:`Take the cube root: <b>x = ${n}</b> (a cube root has only one real answer)`],k===2?'x² has two solutions.':'Cube root has one real solution.');}
+function genLinEq(){const t=pick(['multi','sides','count']);
+  if(t==='count'){const kind=pick(['one','none','inf']);const a=ri(2,6),b=ri(-9,9),c=ri(1,5);let L,R;
+    if(kind==='one'){L=`${a}x ${b<0?MINUS+' '+(-b):'+ '+b}`;R=`${a+c}x ${MINUS} ${ri(1,9)}`;}else if(kind==='none'){L=`${a}(x + ${c})`;R=`${a}x + ${a*c+ri(1,5)}`;}else{L=`${a}(x + ${c})`;R=`${a}x + ${a*c}`;}
+    return mcFixed(`How many solutions does <span class="math">${L} = ${R}</span> have?`,['Exactly one','No solution','Infinitely many'],['one','none','inf'].indexOf(kind),
+      [kind==='one'?'The x-terms have different coefficients, so you can solve for a single value of x.':kind==='none'?`Distribute: ${a}x + ${a*c} = ${R}. The x-terms match but the constants don't (${a*c} ≠ ${R.split('+ ')[1]}) — a false statement, so <b>no solution</b>.`:`Distribute: ${a}x + ${a*c} = ${R}. Both sides are identical, so <b>every</b> x works — <b>infinitely many</b>.`],'Simplify both sides. Same x-coefficient and same constant → infinite. Same x-coefficient, different constant → none.');}
+  let a,b,c,x,d,e;
+  if(t==='multi'){do{a=ri(2,6);b=ri(-6,6);c=ri(-10,10);x=ri(-8,10);}while(b===0);d=a*(x+b)+c;
+    return num(`Solve: <span class="math">${a}(x ${b<0?MINUS+' '+(-b):'+ '+b}) ${c<0?MINUS+' '+(-c):'+ '+c} = ${fmtN(d)}</span>`,x,[`Distribute: ${a}x ${a*b<0?MINUS+' '+(-a*b):'+ '+a*b} ${c<0?MINUS+' '+(-c):'+ '+c} = ${fmtN(d)}`,`Combine: ${a}x ${a*b+c<0?MINUS+' '+(-(a*b+c)):'+ '+(a*b+c)} = ${fmtN(d)}`,`${a}x = ${fmtN(d-a*b-c)} → <b>x = ${fmtN(x)}</b>`],'Distribute first, combine like terms, then undo + and ×.');}
+  do{a=ri(3,9);c=ri(1,a-1);b=ri(-12,12);x=ri(-8,8);}while(false);e=(a-c)*x+b;
+  return num(`Solve: <span class="math">${a}x ${b<0?MINUS+' '+(-b):'+ '+b} = ${c}x ${e<0?MINUS+' '+(-e):'+ '+e}</span>`,x,[`Get x on one side: subtract ${c}x from both sides → ${a-c}x ${b<0?MINUS+' '+(-b):'+ '+b} = ${fmtN(e)}`,`${b<0?'Add '+(-b):'Subtract '+b} on both sides → ${a-c}x = ${fmtN(e-b)}`,`<b>x = ${fmtN(x)}</b>`],'Collect the x-terms on one side and the numbers on the other.');}
+function genFunc(){const t=pick(['isfun','rate','eval','table']);
+  if(t==='isfun'){const xs=shuffle([1,2,3,4,5,6,7]).slice(0,4);const ys=xs.map(()=>ri(-5,9));const good=xs.map((x,i)=>`(${x}, ${fmtN(ys[i])})`).join(', ');
+    const bad=[[xs[0],ys[0]],[xs[1],ys[1]],[xs[0],ys[0]+ri(1,4)],[xs[2],ys[2]]].map(([x,y])=>`(${x}, ${fmtN(y)})`).join(', ');
+    const bad2=[[xs[3],ys[1]],[xs[1],ys[1]],[xs[3],ys[3]+2],[xs[2],ys[2]]].map(([x,y])=>`(${x}, ${fmtN(y)})`).join(', ');
+    const bad3=[[2,1],[3,1],[2,5],[4,0]].map(([x,y])=>`(${x}, ${y})`).join(', ');
+    return mc(`Which set of ordered pairs represents a <b>function</b>?`,[`{${good}}`,`{${bad}}`,`{${bad2}}`,`{${bad3}}`],0,[`A function gives each input (x) exactly <b>one</b> output (y).`,`Check for a repeated x-value with different y-values. Only {${good}} has no repeated x.`],'Look for any x-value that appears twice with different y-values.');}
+  if(t==='rate'){const m=pick([2,3,4,5,-2,-3,0.5,1.5]),b=ri(-5,10);const xs=[0,2,4,6];const rows=xs.map(x=>`<tr><td>${x}</td><td>${fm(m*x+b)}</td></tr>`).join('');
+    return mcNum(`<table class="tt"><tr><th>x</th><th>y</th></tr>${rows}</table>What is the rate of change (slope) of this linear function?`,m,[-m,m*2,b,1/m],[`Rate of change = ${fracH('change in y','change in x')}`,`From x = 0 to x = 2: y goes from ${fm(b)} to ${fm(2*m+b)}, a change of ${fm(2*m)}.`,`${fm(2*m)} ÷ 2 = <b>${fm(m)}</b>`],'Pick two rows: (difference in y) ÷ (difference in x).',{fmt:v=>fm(v)});}
+  if(t==='eval'){const a=pick([2,3,4,-2,-3,5]),b=ri(-9,9),x=ri(-6,6);const v=a*x+b;
+    return mcNum(`If f(x) = ${poly([a,'x'],[b,''])}, what is f(${fmtN(x)})?`,v,[a*x-b,a+x+b,-v,a*(x+b)],[`Replace x with ${fmtN(x)}: f(${fmtN(x)}) = ${a}(${fmtN(x)}) ${b<0?MINUS+' '+(-b):'+ '+b}`,`= ${fmtN(a*x)} ${b<0?MINUS+' '+(-b):'+ '+b} = <b>${fmtN(v)}</b>`],'Substitute the number in for x and simplify.');}
+  const m=pick([2,3,-2,4,-1]),b=ri(-6,8);const xs=[1,2,3];const rows=xs.map(x=>`<tr><td>${x}</td><td>${fmtN(m*x+b)}</td></tr>`).join('');const right=lineH(m,b);
+  return mc(`<table class="tt"><tr><th>x</th><th>y</th></tr>${rows}</table>Which equation matches the table?`,[right,lineH(m,-b===b?b+1:-b),lineH(-m,b),lineH(b===0?1:b,m)].filter((v,i,A)=>A.indexOf(v)===i),0,[`Slope: y changes by ${fmtN(m)} each time x goes up 1 → m = ${fmtN(m)}.`,`Work back to x = 0: ${fmtN(m+b)} ${MINUS} ${par(m)} = ${fmtN(b)} → b = ${fmtN(b)}.`,`<b>${right}</b>`],'Find the change in y per 1 step in x (slope), then the y-value at x = 0.');}
+function genPercent(){const t=pick(['of','disc','tax','change','tip','find']);
+  if(t==='of'){const p=pick([5,10,15,20,25,30,40,60,75,12.5]),n=pick([40,80,120,160,200,240,64,48]);const v=p*n/100;
+    return num(`What is ${p}% of ${n}?`,v,[`${p}% = ${p/100}`,`${p/100} × ${n} = <b>${fm(v)}</b>`],'Change the percent to a decimal and multiply.');}
+  if(t==='disc'){const price=ri(4,30)*5,p=pick([10,15,20,25,30,40]);const v=price*(1-p/100);
+    return num(`A jacket costs $${price}. It is on sale for ${p}% off. What is the sale price (in dollars)?`,v,[`Discount: ${p}% of ${price} = ${fm(price*p/100)}`,`Sale price: ${price} ${MINUS} ${fm(price*p/100)} = <b>$${fm(v)}</b>`,`Shortcut: pay ${100-p}% → ${(100-p)/100} × ${price} = ${fm(v)}`],'Find the discount and subtract it — or multiply by (100% − discount).');}
+  if(t==='tax'){const price=ri(10,80)*2,p=pick([5,6,7,8,10]);const v=r2(price*(1+p/100));
+    return num(`A game costs $${price}. Sales tax is ${p}%. What is the total cost (in dollars)?`,v,[`Tax: ${p}% of ${price} = ${fm(r2(price*p/100))}`,`Total: ${price} + ${fm(r2(price*p/100))} = <b>$${fm(v)}</b>`],'Find the tax and add it — or multiply by (1 + the tax rate as a decimal).');}
+  if(t==='change'){const a=ri(4,40)*5;const p=pick([10,20,25,40,50,-10,-20,-25,-40]);const b=a*(1+p/100);
+    return num(`A number changed from ${a} to ${fm(b)}. What is the percent ${p>0?'increase':'decrease'}?`,Math.abs(p),[`Percent change = ${fracH('change','original')} × 100`,`Change = ${fm(Math.abs(b-a))}; original = ${a}`,`${fm(Math.abs(b-a))} ÷ ${a} × 100 = <b>${Math.abs(p)}%</b>`],'Divide the change by the ORIGINAL amount.',{unit:'%'});}
+  if(t==='tip'){const bill=ri(20,90),p=pick([15,18,20]);const v=r2(bill*p/100);
+    return num(`A dinner bill is $${bill}. How much is a ${p}% tip (in dollars)?`,v,[`${p}% = ${p/100}`,`${p/100} × ${bill} = <b>$${fm(v)}</b>`],'Percent → decimal, then multiply.');}
+  const part=ri(3,30),p=pick([10,20,25,40,50,75]);const whole=part*100/p;if(!Number.isInteger(whole))return genPercent();
+  return num(`${part} is ${p}% of what number?`,whole,[`${p}% of x = ${part} → ${p/100}x = ${part}`,`x = ${part} ÷ ${p/100} = <b>${whole}</b>`],'Set up: (percent as a decimal) × (unknown) = part.');}
+function genStats(){const t=pick(['mean','median','range','missing','mode']);const n=pick([5,6,7]);const d=Array.from({length:n},()=>ri(2,30));const s=d.reduce((a,b)=>a+b,0);const srt=d.slice().sort((a,b)=>a-b);
+  const list=`<span class="math">${d.join(', ')}</span>`;
+  if(t==='mean'){if(s%n)return genStats();return num(`Find the mean of ${list}.`,s/n,[`Add: ${d.join(' + ')} = ${s}`,`Divide by ${n}: ${s} ÷ ${n} = <b>${s/n}</b>`],'Mean = sum ÷ count.');}
+  if(t==='median'){const med=n%2?srt[(n-1)/2]:(srt[n/2-1]+srt[n/2])/2;return num(`Find the median of ${list}.`,med,[`Put in order: ${srt.join(', ')}`,n%2?`The middle value is <b>${med}</b>.`:`Two middle values: ${srt[n/2-1]} and ${srt[n/2]}. Average them: <b>${fm(med)}</b>.`],'Sort first, then find the middle.');}
+  if(t==='range')return num(`Find the range of ${list}.`,srt[n-1]-srt[0],[`Range = greatest ${MINUS} least = ${srt[n-1]} ${MINUS} ${srt[0]} = <b>${srt[n-1]-srt[0]}</b>`],'Biggest minus smallest.');
+  if(t==='mode'){const v=pick(d);const d2=[...d,v];const cnt={};d2.forEach(x=>cnt[x]=(cnt[x]||0)+1);const mx=Math.max(...Object.values(cnt));const modes=Object.keys(cnt).filter(k=>cnt[k]===mx);if(modes.length>1)return genStats();
+    return num(`Find the mode of <span class="math">${shuffle(d2).join(', ')}</span>.`,+modes[0],[`The mode is the value that appears most often: <b>${modes[0]}</b> (${mx} times).`],'Which number shows up the most?');}
+  const target=ri(60,95),k=4;const sc=Array.from({length:k},()=>ri(60,100));const need=target*(k+1)-sc.reduce((a,b)=>a+b,0);if(need<40||need>100)return genStats();
+  return num(`Jordan's first ${k} test scores are ${sc.join(', ')}. What score does Jordan need on the 5th test to have a mean of exactly ${target}?`,need,[`Total needed: ${target} × 5 = ${target*5}`,`Current total: ${sc.join(' + ')} = ${sc.reduce((a,b)=>a+b,0)}`,`Needed: ${target*5} ${MINUS} ${sc.reduce((a,b)=>a+b,0)} = <b>${need}</b>`],'Mean × number of tests = required total.');}
+
+/* ---------- convert any practice problem to multiple choice ---------- */
+function approxQ(v,maxD=60){for(let d=1;d<=maxD;d++){const n=Math.round(v*d);if(Math.abs(n/d-v)<1e-9)return new Q(n,d);}return null;}
+function stripNotes(h){return h.replace(/<br><span class="muted small">[\s\S]*?<\/span>/g,'').replace(/\s*<span class="muted small">[\s\S]*?<\/span>/g,'').replace(/ Answer in slope-intercept form <b>y = mx \+ b<\/b> — type the slope m and the y-intercept b\./,'').replace(/ The third side x must satisfy ___ &lt; x &lt; ___\. Fill in the two numbers\./,' What are the possible lengths of the third side x?').replace(/ Write the rule \(x, y\) → \(x \+ a, y \+ b\)\. Find a and b\./,' Which rule describes the translation?');}
+function pickDistinct(right,cands,n=3){const out=[],seen=new Set([right]);for(const c of cands){if(c==null)continue;if(!seen.has(c)){seen.add(c);out.push(c);}if(out.length===n)break;}return out;}
+function numChoices(p){const a=p.answer,u=p.unit||'',f=p.finalH||'';const U=s=>s+(u==='°'?'°':u==='%'?'%':'');
+  if(/π/.test(f)){const k=approxQ(a/Math.PI,12);if(k){const P=q=>q.eq(1)?'π':q.html()+'π';return {right:P(k),wrong:pickDistinct(P(k),shuffle([k.mul(2),k.div(2),k.mul(new Q(3,2)),k.add(4)]).map(P))};}}
+  const m=f.match(/^(\d*)√(\d+)$/);if(m){const o=+(m[1]||1),i=+m[2];const R=(oo,ii)=>(oo===1?'':oo)+'√'+ii;return {right:f,wrong:pickDistinct(f,shuffle([R(o*2,i),R(o+1,i),String(o*o*i),R(o,i+1)]))};}
+  if(Number.isInteger(a)){const c=[];if(u==='°'){if(180-a>0&&180-a!==a)c.push(180-a);if(90-a>0&&90-a!==a)c.push(90-a);}
+    const t2=shuffle([a*2,Math.round(a/2),a+10,a-10].filter(v=>v!==a&&(a<0||v>=0)));const t3=shuffle([a+1,a-1,a+2,a-2,a+5,a-5].filter(v=>a<0||v>=0));
+    const cand=[...c.slice(0,1),...t2.slice(0,1),...shuffle([...c.slice(1),...t2.slice(1),...t3])];return {right:U(fmtN(a)),wrong:pickDistinct(U(fmtN(a)),cand.map(v=>U(fmtN(v))))};}
+  const q=approxQ(a,40);if(q&&q.d<=40){const H=x=>U(x.html());let c;
+    if(a>0&&a<1){c=[new Q(1).sub(q),new Q(q.n+1,q.d),new Q(q.n,q.d+1),new Q(Math.max(1,q.n-1),q.d),new Q(q.n,Math.max(q.n+1,q.d-1)),new Q(2*q.n,q.d)].filter(x=>x.val()>0&&x.val()<1);}
+    else{c=[q.neg(),new Q(q.n+1,q.d),new Q(q.n,q.d+1),new Q(q.n*2,q.d)];if(q.n!==0)c.push(new Q(q.d,q.n),new Q(-q.d,q.n));if(a>0)c=c.filter(x=>x.val()>0);}
+    return {right:H(q),wrong:pickDistinct(H(q),shuffle(c).map(H))};}
+  const dg=(p.tol||0)>=0.05?1:2;const R=v=>U(fm(+v.toFixed(dg)));return {right:R(a),wrong:pickDistinct(R(a),shuffle([a*1.25,a*0.8,a*1.5,a+(a>10?5:1),a*2]).map(R))};}
+function multiChoices(p){const F=p.fields,lab=F.map(f=>f.label.trim()),v=F.map(f=>f.answer);const key=lab.join('|');
+  if(p.unordered){const fx=x=>fm(+x.toFixed(2));if(Math.abs(v[0]+v[1])<1e-9&&v[0]!==0){const k=Math.abs(v[0]);return {right:`x = ±${fx(k)}`,wrong:pickDistinct(`x = ±${fx(k)}`,[`x = ${fx(k)} only`,`x = ±${fx(k*k)}`,`x = ±${fx(k*2)}`,`x = ±${fx(k/2)}`])};}
+    const S=(a,b)=>{const s=[a,b].sort((x,y)=>x-y);return `x = ${fx(s[0])} or x = ${fx(s[1])}`;};return {right:S(v[0],v[1]),wrong:pickDistinct(S(v[0],v[1]),[S(-v[0],-v[1]),S(v[0],-v[1]),S(-v[0],v[1]),S(v[0]+1,v[1]+1)])};}
+  if(key==='x =|y ='){const C=(x,y)=>`(${fm(x)}, ${fm(y)})`;const [x,y]=v;return {right:C(x,y),wrong:pickDistinct(C(x,y),shuffle([C(-x,y),C(x,-y),C(y,x),C(-x,-y),C(x+1,y),C(x,y+1)]))};}
+  if(key==='m =|b ='){const L2=(m,b)=>lineH(approxQ(m,12)||new Q(Math.round(m)),approxQ(b,12)||new Q(Math.round(b)));const [m,b]=v;const c=[L2(m,-b),L2(-m,b),L2(-m,-b)];if(m!==0&&b!==0)c.push(L2(b,m));if(m!==0)c.push(L2(1/m,b));return {right:L2(m,b),wrong:pickDistinct(L2(m,b),shuffle(c))};}
+  if(key==='a =|√ b ='){const R=(a,b)=>b===1?String(a):(a===1?'':a)+'√'+b;const [a,b]=v;return {right:R(a,b),wrong:pickDistinct(R(a,b),shuffle([R(a+1,b),R(a*2,b),String(a*a*b),R(a,b*2),R(b,a)]))};}
+  if(key==='h =|k =|r ='){const C=(h,k,r)=>`center (${fmtN(h)}, ${fmtN(k)}), radius ${fm(r)}`;const [h,k,r]=v;return {right:C(h,k,r),wrong:pickDistinct(C(h,k,r),shuffle([C(-h,-k,r),C(h,k,r*r),C(-h,-k,r*r),C(k,h,r)]))};}
+  if(key==='greater than|less than'){const [lo,hi]=v;const R=(a,b)=>`${fm(a)} &lt; x &lt; ${fm(b)}`;return {right:R(lo,hi),wrong:pickDistinct(R(lo,hi),[R(0,hi),R(lo,(hi+lo)/2|0),R(lo+1,hi-1),R(Math.min(hi-lo,lo),hi+lo)])};}
+  if(key==='a =|b ='){const R=(a,b)=>`(x, y) → (x ${a<0?MINUS+' '+(-a):'+ '+a}, y ${b<0?MINUS+' '+(-b):'+ '+b})`;const [a,b]=v;return {right:R(a,b),wrong:pickDistinct(R(a,b),shuffle([R(-a,-b),R(b,a),R(-a,b),R(a,-b)]))};}
+  const G=vals=>F.map((f,i)=>`${f.label.replace(/=\s*$/,'').trim()} ${fm(vals[i])}`).join(', ');
+  return {right:G(v),wrong:pickDistinct(G(v),shuffle([v.slice().reverse(),v.map((x,i)=>i===0?x+5:x),v.map((x,i)=>i===1?x+5:x),v.map((x,i)=>i===0?x-5:x)]).map(G))};}
+function toMC(p){if(!p)return p;if(p.kind==='mc')return p;
+  const c=p.kind==='num'?numChoices(p):p.kind==='multi'?multiChoices(p):null;if(!c||c.wrong.length<3)return null;
+  return mc(stripNotes(p.prompt),[c.right,...c.wrong],0,p.steps,p.hint,{visual:p.visual||''});}
+const asMC=g=>()=>{for(let k=0;k<12;k++){const p=toMC(g());if(p)return p;}return null;};
+
+/* ---------- language arts bank (original items) ---------- */
+const GRAMMAR=[
+ {q:'Neither the coach nor the players ___ happy with the call.',c:['were','was','is','has been'],s:['With <b>neither…nor</b>, the verb agrees with the subject <b>closer</b> to it: "players" (plural) → <b>were</b>.'],h:'Which subject is closer to the verb?'},
+ {q:'Each of the students ___ a lab notebook.',c:['has','have','are having','were having'],s:['<b>Each</b> is singular, so it takes a singular verb: <b>has</b>. ("of the students" is just a prepositional phrase.)'],h:'Cross out "of the students." What is the real subject?'},
+ {q:'The box of old photographs ___ in the attic.',c:['is','are','were','have been'],s:['The subject is <b>box</b> (singular), not "photographs." → <b>is</b>.'],h:'Ignore the prepositional phrase "of old photographs."'},
+ {q:'There ___ several reasons to arrive early.',c:['are','is','was','has been'],s:['In a "there is/are" sentence, the subject comes after the verb: <b>reasons</b> (plural) → <b>are</b>.'],h:'Find the subject after the verb.'},
+ {q:'The teacher gave the awards to Maya and ___.',c:['me','I','myself','mine'],s:['After a preposition ("to") you need the object form: <b>me</b>. Test: "gave the awards to me."'],h:'Drop "Maya and" and read it again.'},
+ {q:'___ and I are going to the aquarium on Saturday.',c:['She','Her','Hers','Herself'],s:['This is a subject, so use the subject form: <b>She</b>. Test: "She is going."'],h:'Drop "and I" and read it again.'},
+ {q:'The team celebrated ___ victory with a pizza party.',c:['its','it\'s','their','there'],s:['<b>Team</b> is a single group, so use the singular possessive <b>its</b>. ("It\'s" means "it is.")'],h:'Is "team" one thing or many? And is this possessive?'},
+ {q:'To ___ should I address the letter?',c:['whom','who','whose','who\'s'],s:['After a preposition ("to"), use the object form <b>whom</b>. Test: "address it to <i>him</i>" → him = whom.'],h:'Would you answer with "he" or "him"?'},
+ {q:'The octopus changed ___ color in seconds.',c:['its','it\'s','its\'','their'],s:['Possessive "its" has <b>no apostrophe</b>. "It\'s" always means "it is" or "it has."'],h:'Try replacing with "it is." Does it make sense?'},
+ {q:'___ going to test the water samples tomorrow.',c:['They\'re','Their','There','Theyre'],s:['<b>They\'re</b> = "they are." "Their" shows ownership; "there" is a place.'],h:'Replace with "they are."'},
+ {q:'The storm had a major ___ on the beach.',c:['effect','affect','affects','effected'],s:['<b>Effect</b> is usually the noun (a result). <b>Affect</b> is usually the verb (to influence). After "a major," you need a noun.'],h:'A = Action (verb), E = End result (noun).'},
+ {q:'The blue whale is larger ___ any dinosaur.',c:['than','then','that','as'],s:['<b>Than</b> compares. <b>Then</b> is about time.'],h:'Comparison or time?'},
+ {q:'Yesterday we walked to the dock and ___ the research boat.',c:['boarded','board','will board','are boarding'],s:['The sentence is in the past ("Yesterday… walked"), so keep the tense consistent: <b>boarded</b>.'],h:'Keep the verbs in the same time frame.'},
+ {q:'By noon, the divers had ___ all the way to the reef.',c:['swum','swam','swimmed','swim'],s:['With "had," use the past participle: swim → swam → <b>swum</b>.'],h:'After "had," use the third form of the verb.'},
+ {q:'The tired dog likes to ___ in the sun all afternoon.',c:['lie','lay','laid','lain'],s:['<b>Lie</b> = recline (no object). <b>Lay</b> = put something down (needs an object).'],h:'Is the dog putting something down, or resting?'},
+ {q:'She did ___ on the science test.',c:['well','good','goodly','more good'],s:['"Did" is an action verb, so it takes an adverb: <b>well</b>. "Good" is an adjective.'],h:'Adverbs describe how an action is done.'},
+ {q:'Of the three research boats, the Blue Sea is the ___.',c:['largest','larger','most large','more larger'],s:['Comparing <b>three or more</b> → superlative (-est): <b>largest</b>. "Larger" compares only two.'],h:'How many things are being compared?'},
+ {q:'We didn\'t see ___ dolphins on the trip.',c:['any','no','none','nothing'],s:['"Didn\'t" is already negative; "no" would make a double negative. Use <b>any</b>.'],h:'Avoid double negatives.'},
+ {q:'Between you and ___, the quiz was easier than I expected.',c:['me','I','myself','mine'],s:['"Between" is a preposition, so use the object form: <b>me</b>.'],h:'After a preposition, use me/him/her/us/them.'},
+ {q:'Everyone in the class ___ finished the project.',c:['has','have','are','were'],s:['<b>Everyone</b> is singular → <b>has</b>.'],h:'Indefinite pronouns like everyone, each, and nobody are singular.'}
+];
+const PUNCT=[
+ {q:'Which sentence is punctuated correctly?',c:['After the storm passed, the crew checked the nets.','After the storm passed the crew, checked the nets.','After, the storm passed the crew checked the nets.','After the storm, passed the crew checked the nets.'],s:['Put a comma after an <b>introductory clause</b> ("After the storm passed").'],h:'Where does the introductory part end?'},
+ {q:'Which sentence uses commas correctly in a series?',c:['We packed sunscreen, water, and snacks.','We packed, sunscreen, water, and snacks.','We packed sunscreen water, and, snacks.','We packed sunscreen, water and, snacks.'],s:['Separate items in a list with commas; no comma right after the verb.'],h:'Commas go between the items, not before the list.'},
+ {q:'Which sentence is punctuated correctly?',c:['The tide was low, so we explored the tide pools.','The tide was low so, we explored the tide pools.','The tide was low, we explored the tide pools.','The tide, was low so we explored the tide pools.'],s:['Two complete sentences joined by a conjunction (for, and, nor, but, or, yet, so) need a comma <b>before</b> the conjunction.'],h:'FANBOYS: comma before the conjunction.'},
+ {q:'Which is a <b>comma splice</b> (an error)?',c:['The fog rolled in, we could not see the lighthouse.','The fog rolled in, and we could not see the lighthouse.','The fog rolled in; we could not see the lighthouse.','Because the fog rolled in, we could not see the lighthouse.'],s:['A comma alone cannot join two complete sentences. Fix it with ", and", a semicolon, or a period.'],h:'Look for two full sentences joined by only a comma.'},
+ {q:'Which sentence uses a semicolon correctly?',c:['The lab was quiet; everyone was focused on the experiment.','The lab was quiet; and everyone was focused.','The lab; was quiet because everyone was focused.','Because the lab was quiet; everyone was focused.'],s:['A semicolon joins two <b>complete</b> sentences that are closely related — without "and."'],h:'Can both sides stand alone as sentences?'},
+ {q:'Which sentence uses a colon correctly?',c:['Bring three items: a notebook, a pencil, and a ruler.','Bring: a notebook, a pencil, and a ruler.','Bring three: items a notebook, a pencil, and a ruler.','Bring three items a notebook: a pencil, and a ruler.'],s:['A colon comes after a complete sentence to introduce a list. Don\'t put it right after a verb.'],h:'Is there a complete sentence before the colon?'},
+ {q:'Which shows the projects that belong to <b>many</b> students?',c:['the students\' projects','the student\'s projects','the students projects','the students\'s projects'],s:['Plural noun ending in s → add only an apostrophe: <b>students\'</b>.'],h:'Make it plural first (students), then show ownership.'},
+ {q:'Which sentence is punctuated correctly?',c:['"Wait for me," said Leo.','"Wait for me" said Leo.','"Wait for me", said Leo.','"Wait for me." said Leo.'],s:['The comma goes <b>inside</b> the closing quotation mark when a dialogue tag follows.'],h:'In American English, commas and periods go inside the quotes.'},
+ {q:'Which sentence is capitalized correctly?',c:['Last summer we visited Sandy Hook in New Jersey.','Last Summer we visited Sandy Hook in New Jersey.','Last summer we visited sandy hook in New Jersey.','Last summer we Visited Sandy Hook in new Jersey.'],s:['Capitalize proper nouns (Sandy Hook, New Jersey). Seasons are <b>not</b> capitalized.'],h:'Seasons are common nouns.'},
+ {q:'Which sentence uses commas correctly?',c:['My brother, a marine biologist, studies sharks.','My brother a marine biologist, studies sharks.','My brother, a marine biologist studies sharks.','My, brother a marine biologist studies sharks.'],s:['"a marine biologist" is an <b>appositive</b> (extra info renaming the noun) — set it off with commas on <b>both</b> sides.'],h:'Extra information needs a comma before and after.'},
+ {q:'Which sentence is correct?',c:['Students who finish early may read quietly.','Students, who finish early, may read quietly.','Students who finish early, may read quietly.','Students, who finish early may read quietly.'],s:['"who finish early" tells <b>which</b> students — it is essential, so no commas.'],h:'Does the clause identify which students, or add extra info?'}
+];
+const SENT=[
+ {q:'Which is a sentence <b>fragment</b>?',c:['Because the ferry was late.','The ferry was late.','The ferry was late, so we waited.','We waited because the ferry was late.'],s:['"Because the ferry was late" is a dependent clause — it can\'t stand alone.'],h:'Which one leaves you asking "…so what happened?"'},
+ {q:'Which is the best revision of: "The fog rolled in we couldn\'t see the lighthouse."',c:['The fog rolled in, and we couldn\'t see the lighthouse.','The fog rolled in we couldn\'t, see the lighthouse.','The fog rolled in, we couldn\'t see the lighthouse.','The fog, rolled in and we couldn\'t see the lighthouse.'],s:['This is a run-on. Join the two sentences with a comma <b>and</b> a conjunction (or use a period or semicolon).'],h:'A comma alone is not enough.'},
+ {q:'Which sentence is written correctly?',c:['Walking along the beach, I found a horseshoe crab.','Walking along the beach, a horseshoe crab was found.','Walking along the beach, the horseshoe crab was spotted by me.','A horseshoe crab, walking along the beach, I found.'],s:['The opening phrase must describe the word right after the comma. <b>I</b> was walking — not the crab. (Dangling modifier.)'],h:'Who is walking along the beach?'},
+ {q:'Which sentence has <b>parallel structure</b>?',c:['She likes swimming, sailing, and fishing.','She likes swimming, sailing, and to fish.','She likes to swim, sailing, and fishing.','She likes swimming, to sail, and she fishes.'],s:['Items in a list should have the same form: swimming, sailing, <b>fishing</b>.'],h:'Make all three items match.'},
+ {q:'The goal of the lab is to observe, record, and ___ the data.',c:['analyze','analyzing','analysis of','to be analyzing'],s:['Parallel structure: observe, record, <b>analyze</b> (all base verbs after "to").'],h:'Match the form of "observe" and "record."'},
+ {q:'Which is the clearest sentence?',c:['The scientist carefully labeled the samples she collected.','The scientist labeled carefully the samples she collected carefully.','Carefully the scientist the samples labeled she collected.','The samples, the scientist labeled them, she collected carefully.'],s:['Clear, direct word order with no repetition.'],h:'Which sounds natural and says it once?'},
+ {q:'Which best combines: "Sea turtles hatch on beaches. Years later, many return to the same beaches to lay eggs."',c:['Many sea turtles return to the beaches where they hatched to lay their own eggs.','Sea turtles hatch on beaches, years later, many return to the same beaches.','Sea turtles hatch on beaches and years later and many return to lay eggs.','Hatching on beaches, eggs are laid years later by sea turtles returning.'],s:['The best combination is grammatical, keeps the meaning, and removes repetition.'],h:'Avoid comma splices and stringy "and…and."'},
+ {q:'Which sentence is the most <b>concise</b>?',c:['The meeting starts at 3 p.m.','The meeting is going to be starting at the time of 3 p.m.','At 3 p.m. in the afternoon, the meeting starts.','The meeting, which is a meeting, starts at 3 p.m.'],s:['Concise = no extra words. "3 p.m. in the afternoon" is redundant.'],h:'Pick the shortest sentence that keeps the full meaning.'}
+];
+const WRITING=[
+ {q:'Plastic pollution harms marine life. ___, many towns have banned single-use plastic bags.',c:['As a result','However','For example','Meanwhile'],s:['The second sentence is a <b>result</b> of the first → "As a result."'],h:'Cause → effect, contrast, or example?'},
+ {q:'The test was difficult. ___, most students passed it.',c:['Nevertheless','Therefore','Similarly','For instance'],s:['The second idea <b>contrasts</b> with the first (difficult, yet passed) → "Nevertheless."'],h:'Is the second sentence surprising given the first?'},
+ {q:'Some animals hide using camouflage. ___, the flounder can change its colors to match the sand.',c:['For example','In contrast','Finally','Otherwise'],s:['The flounder is an <b>example</b> of camouflage.'],h:'Does the second sentence give an example?'},
+ {q:'Which is the best <b>topic sentence</b> for a paragraph about how oyster reefs clean bay water and protect shorelines?',c:['Oyster reefs do important work for the bays where they grow.','Oysters can be eaten raw or cooked.','My family went to the bay last summer.','Some people do not like the taste of oysters.'],s:['A topic sentence states the <b>main idea</b> of the whole paragraph — the work oyster reefs do.'],h:'Which sentence covers everything the paragraph will say?'},
+ {q:'(1) Horseshoe crabs have lived on Earth for millions of years. (2) Their blue blood is used to test medicines for safety. (3) My favorite ice cream flavor is mint. (4) Shorebirds depend on their eggs for food.<br>Which sentence does <b>not</b> belong?',c:['Sentence 3','Sentence 1','Sentence 2','Sentence 4'],s:['Sentence 3 is off-topic — the paragraph is about horseshoe crabs.'],h:'Which sentence is about something else?'},
+ {q:'Which word makes this sentence most precise? "The scientist ___ the water sample under a microscope."',c:['examined','looked at','did stuff to','saw'],s:['"Examined" is the most precise, formal word for careful study.'],h:'Pick the most specific, academic word.'},
+ {q:'Which sentence is most appropriate for a formal science report?',c:['The data indicate that water temperature affects crab activity.','The data kinda show the crabs liked warm water a lot.','So basically, crabs are super chill when it\'s warm.','Crabs = more active when warm!!!'],s:['A formal report uses precise words and no slang, abbreviations, or exclamation points.'],h:'Which sounds like a textbook?'},
+ {q:'Which sentence does <b>not</b> repeat itself (no redundancy)?',c:['The twins arrived at the same time.','The two twins arrived at the same time together.','The twins, both of them, arrived simultaneously at the same time.','The pair of two twins arrived at once together.'],s:['"Two twins," "at the same time together," and "simultaneously at the same time" all repeat ideas.'],h:'Twins are always two.'},
+ {q:'A student claims that the school should add a recycling program. Which detail <b>best supports</b> the claim?',c:['The cafeteria throws away about 300 plastic bottles each day.','Many students enjoy art class.','The school was built in 1975.','Recycling bins come in many colors.'],s:['Strong evidence is specific and directly related to the claim — 300 bottles a day shows a real need.'],h:'Which fact actually proves there is a problem to fix?'},
+ {q:'Which is the best <b>concluding sentence</b> for a paragraph explaining why sleep helps students learn?',c:['Getting enough sleep is one of the simplest ways for students to learn better.','Some students like to stay up late.','Next, I will talk about breakfast.','Sleep is when you close your eyes.'],s:['A conclusion restates the main idea in a fresh way.'],h:'Which sentence wraps up the paragraph\'s main point?'}
+];
+const VOCAB=[
+ {q:'"The <b>fragile</b> coral can be damaged by a single touch." <b>Fragile</b> most nearly means…',c:['easily broken','brightly colored','very large','fast-growing'],s:['The clue "damaged by a single touch" shows it breaks easily.'],h:'Use the context clue after the word.'},
+ {q:'"Her explanation was so <b>lucid</b> that everyone understood it right away." <b>Lucid</b> means…',c:['clear','long','boring','confusing'],s:['"everyone understood it right away" → clear.'],h:'What kind of explanation is easy to understand?'},
+ {q:'"The crew was <b>reluctant</b> to sail into the storm." <b>Reluctant</b> means…',c:['unwilling','excited','prepared','afraid of water'],s:['Sailing into a storm is something people don\'t want to do → unwilling.'],h:'How would you feel about sailing into a storm?'},
+ {q:'"The hypothesis was later <b>corroborated</b> by new data." <b>Corroborated</b> means…',c:['confirmed','disproved','ignored','replaced'],s:['New data that agrees with a hypothesis <b>confirms</b> it.'],h:'Did the data help or hurt the hypothesis?'},
+ {q:'"After the factory closed, the town\'s population <b>dwindled</b>." <b>Dwindled</b> means…',c:['decreased','grew','moved','celebrated'],s:['When jobs leave, people leave → the population decreased.'],h:'What happens to a town when its factory closes?'},
+ {q:'"The tide pool <b>teemed</b> with crabs, snails, and tiny fish." <b>Teemed</b> means…',c:['was full of','was empty of','was dangerous for','was cold for'],s:['A list of many creatures → the pool was full of life.'],h:'The list of animals is the clue.'},
+ {q:'The prefix <b>sub-</b> in <i>submarine</i> means…',c:['under','over','across','against'],s:['A submarine travels <b>under</b> the sea. (subway, submerge)'],h:'Think of subway and submerge.'},
+ {q:'The root <b>aqua</b> (as in <i>aquarium</i>) means…',c:['water','air','light','life'],s:['aquarium, aquatic, aqueduct — all about <b>water</b>.'],h:'What is in an aquarium?'},
+ {q:'"The coach gave a <b>terse</b> reply and walked away." <b>Terse</b> means…',c:['brief and abrupt','loud and angry','kind and patient','long and detailed'],s:['A reply followed by walking away suggests a short, abrupt answer.'],h:'Did the coach say a lot or a little?'},
+ {q:'"The results were <b>ambiguous</b>, so the team ran the test again." <b>Ambiguous</b> means…',c:['unclear; open to more than one meaning','perfectly clear','exciting','impossible'],s:['They had to repeat the test because the results weren\'t clear.'],h:'Why would you need to run a test again?'},
+ {q:'The suffix <b>-less</b> in <i>fearless</i> means…',c:['without','full of','able to','one who'],s:['fearless = <b>without</b> fear (careless, endless).'],h:'Think of careless and endless.'},
+ {q:'"The scientists worked <b>meticulously</b>, checking every measurement twice." <b>Meticulously</b> means…',c:['very carefully','very quickly','carelessly','loudly'],s:['Checking every measurement twice shows great care.'],h:'The second half of the sentence explains the word.'}
+];
+const PASSAGES=[
+{title:'The Oyster Comeback',text:`<p>A single adult oyster can filter up to fifty gallons of water in a day. As it feeds, it pulls in tiny bits of algae and sediment and leaves the water clearer than before. For this reason, scientists sometimes call oysters "nature's water filters."</p><p>Over the past century, however, oyster populations in many East Coast bays dropped sharply. Overharvesting, pollution, and disease all played a part. With fewer oysters, the bays grew cloudier, and sunlight could no longer reach the underwater grasses that young fish use for shelter.</p><p>Today, volunteers are helping oysters make a comeback. In some programs, families raise baby oysters in mesh cages hung from docks. After a year, the young oysters are moved to protected reefs. Restaurants also donate their used shells, which are cleaned and returned to the water. Baby oysters attach to the old shells and build new reefs on top of them.</p><p>These reefs do more than clean water. They also break up waves before the waves reach the shore, which helps protect beaches from erosion. A healthy reef can be home to dozens of other species, from crabs to small fish. Restoring oysters, it turns out, helps restore the whole bay.</p>`,
+ qs:[{q:'What is the <b>main idea</b> of the passage?',c:['Bringing back oysters improves the health of entire bays.','Oysters are popular in restaurants.','Scientists do not understand why oysters disappeared.','Volunteers should not touch oysters.'],s:['Every paragraph builds toward the last sentence: restoring oysters helps restore the whole bay.'],h:'What does the final paragraph conclude?'},
+  {q:'According to the passage, why did the underwater grasses suffer?',c:['The water became too cloudy for sunlight to reach them.','Volunteers removed them.','Oysters ate the grasses.','Waves pulled the grasses onto the beach.'],s:['Paragraph 2: "the bays grew cloudier, and sunlight could no longer reach the underwater grasses."'],h:'Look at paragraph 2.'},
+  {q:'Why do restaurants donate their used oyster shells?',c:['Baby oysters attach to old shells to build new reefs.','The shells are ground up to feed fish.','The shells are sold to raise money.','Old shells filter water better than live oysters.'],s:['Paragraph 3: "Baby oysters attach to the old shells and build new reefs on top of them."'],h:'Find the sentence right after the shells are returned to the water.'},
+  {q:'As used in paragraph 4, the word <b>erosion</b> most nearly means…',c:['the slow wearing away of land','a type of shellfish','the cleaning of water','a large wave'],s:['Reefs "break up waves" to protect beaches — erosion is the wearing away of the shore.'],h:'What do waves do to a beach over time?'},
+  {q:'Why does the author include the fact that an oyster can filter fifty gallons of water a day?',c:['To show how powerful a single oyster is at cleaning water','To prove that oysters are the largest shellfish','To explain how oysters are cooked','To argue that oysters should not be eaten'],s:['The fact supports the idea that oysters are "nature\'s water filters."'],h:'What does the next sentence call oysters?'}]},
+{title:'The Night Watch',text:`<p>Mara had begged for weeks to stay up for the night watch at her grandfather's marina. Now, at two in the morning, with the wind tugging at her jacket, she wasn't so sure it had been a good idea.</p><p>"Check the lines on slip twelve," Grandpa said, handing her a flashlight. His voice was calm, the same voice he used when he read the newspaper.</p><p>Mara hurried down the dock. The boats knocked against their bumpers like restless horses. At slip twelve, one rope had slipped loose and the little sailboat was drifting toward its neighbor. Her heart pounded. She remembered how Grandpa tied a cleat hitch — loop, cross, loop, tuck — and she pulled the rope tight, her fingers numb with cold.</p><p>When she came back, Grandpa raised an eyebrow. "Everything all right?"</p><p>"It is now," Mara said. She tried to sound as calm as he did, but she couldn't stop grinning.</p><p>Grandpa nodded slowly and poured her a cup of cocoa from his thermos. "Then I guess I've got a new first mate," he said.</p>`,
+ qs:[{q:'How does Mara <b>change</b> during the story?',c:['She goes from unsure to proud and confident.','She goes from brave to frightened.','She goes from angry to sad.','She does not change at all.'],s:['At first she "wasn\'t so sure"; after fixing the rope she "couldn\'t stop grinning."'],h:'Compare how she feels at the beginning and the end.'},
+  {q:'What does the comparison "like restless horses" help the reader picture?',c:['The boats moving and bumping in the wind','The horses Grandpa keeps at the marina','The sound of Mara\'s footsteps','The calm water at night'],s:['The simile compares the boats knocking against their bumpers to restless horses — they are moving and uneasy.'],h:'What is being compared to horses?'},
+  {q:'What can the reader <b>infer</b> about Grandpa?',c:['He trusts Mara and is proud of her.','He is angry that Mara stayed up late.','He is afraid of storms.','He does not know how to tie knots.'],s:['He sends her alone to fix the boat and then calls her his "new first mate."'],h:'What does "new first mate" suggest?'},
+  {q:'Which detail best shows that Mara had learned from her grandfather?',c:['She remembered how Grandpa tied a cleat hitch.','She held a flashlight.','The wind tugged at her jacket.','She drank a cup of cocoa.'],s:['She uses the knot he taught her — "loop, cross, loop, tuck."'],h:'Which detail shows a skill she picked up from him?'},
+  {q:'Which best states a <b>theme</b> of the story?',c:['Facing a challenge can build confidence.','Boats are dangerous at night.','Children should always go to bed early.','Hot cocoa is the best drink.'],s:['Mara faces a scary moment, handles it, and grows more confident.'],h:'What lesson does Mara\'s experience teach?'}]},
+{title:'Surfmen of the Life-Saving Service',text:`<p>In the 1800s, the coast of New Jersey was one of the most dangerous places in the world for ships. Hidden sandbars lay just offshore, and winter storms could drive a ship aground within sight of the beach. Many sailors drowned only a few hundred yards from land.</p><p>To solve this problem, the United States created a chain of lifesaving stations along the coast. In 1878, these stations became part of a separate agency, the U.S. Life-Saving Service. Each station had a keeper and a crew of "surfmen." During storms, surfmen walked the beach all night, watching for ships in trouble.</p><p>When they spotted a wreck, the crew had two main choices. If the waves were not too high, they rowed a surfboat out to the ship. If the sea was too rough, they fired a line from a small cannon to the ship's mast. Then they used the line to pull sailors to shore, one at a time, in a device called a breeches buoy.</p><p>The work was exhausting and dangerous, and the surfmen were paid little. Still, they rescued thousands of people. In 1915, the Life-Saving Service joined with the Revenue Cutter Service to form the United States Coast Guard, which continues their mission today.</p>`,
+ qs:[{q:'What was the main <b>problem</b> the lifesaving stations were created to solve?',c:['Sailors were drowning in shipwrecks close to shore.','Ships could not find their way into port.','There were not enough lighthouses.','Pirates were attacking ships.'],s:['Paragraph 1 describes ships running aground and sailors drowning near the beach.'],h:'Look at the end of paragraph 1.'},
+  {q:'How is paragraph 3 mainly organized?',c:['It explains two methods and when each one was used.','It tells events in the order of a surfman\'s life.','It compares the Coast Guard to the Navy.','It argues that surfmen should be paid more.'],s:['It describes rowing a surfboat (calmer seas) vs. firing a line (rough seas).'],h:'Look for "If… If…"'},
+  {q:'According to the passage, when did the surfmen use the cannon?',c:['When the sea was too rough to row out','When the ship was on fire','When it was daytime','When the ship was far from shore in calm water'],s:['"If the sea was too rough, they fired a line from a small cannon."'],h:'Find the word "cannon."'},
+  {q:'Which sentence best supports the idea that surfmen were dedicated to their work?',c:['"The work was exhausting and dangerous, and the surfmen were paid little. Still, they rescued thousands of people."','"In 1878, these stations became part of a separate agency."','"Hidden sandbars lay just offshore."','"Each station had a keeper and a crew."'],s:['They kept saving lives even though the job was hard, risky, and poorly paid.'],h:'Which sentence shows them working hard despite difficulties?'},
+  {q:'What happened to the Life-Saving Service in 1915?',c:['It combined with another agency to form the U.S. Coast Guard.','It was shut down because it was no longer needed.','It moved its stations to the Pacific coast.','It began building lighthouses.'],s:['The last paragraph: it joined the Revenue Cutter Service to form the Coast Guard.'],h:'Look at the last paragraph.'}]},
+{title:'Let Students Sleep',text:`<p>Every school morning, thousands of teenagers drag themselves out of bed before the sun rises. Our school should push back its start time by one hour. A later start would help students stay healthier and learn more.</p><p>Doctors who study sleep explain that teenagers' body clocks naturally shift later during puberty. Most teens cannot fall asleep before about eleven at night, yet they need eight to ten hours of sleep. When school begins at 7:30, many students get only six or seven hours.</p><p>Tired students struggle in class. They have trouble paying attention and remembering what they learned. Several school districts that moved their start times later have reported better attendance and fewer students falling asleep in first period.</p><p>Some people argue that a later start would interfere with after-school sports and jobs. This concern is understandable, but practices could be shifted slightly later, and many activities already take place in the evening. A small schedule change is worth it if students are healthier and more focused.</p><p>Our school board should vote to start the school day at 8:30. Our students — and their grades — will thank us.</p>`,
+ qs:[{q:'What is the author\'s main <b>claim</b>?',c:['The school should start one hour later.','Teenagers should go to bed earlier.','After-school sports should be canceled.','Doctors should teach classes.'],s:['Paragraph 1 states it directly: "Our school should push back its start time by one hour."'],h:'Look for the sentence that says what should be done.'},
+  {q:'Which evidence does the author use to support the claim?',c:['Districts with later start times reported better attendance.','Most students prefer pizza for lunch.','The school building is old.','Teachers like to arrive early.'],s:['Paragraph 3 cites results from districts that changed their start times.'],h:'Which choice is a fact about schools that tried it?'},
+  {q:'How does the author respond to the <b>counterargument</b> about sports and jobs?',c:['By admitting the concern but explaining that schedules can adjust','By saying sports are a waste of time','By ignoring it completely','By agreeing that the school should not change'],s:['"This concern is understandable, but practices could be shifted slightly later…"'],h:'Look at paragraph 4.'},
+  {q:'Why does the author mention that teenagers\' body clocks shift during puberty?',c:['To explain why teens can\'t easily fall asleep earlier','To prove that teens are lazy','To describe how clocks work','To argue against sleep research'],s:['It shows that staying up late is natural for teens, so an early start cuts into their sleep.'],h:'How does this fact connect to the claim?'},
+  {q:'What is the author\'s <b>purpose</b> in this passage?',c:['To persuade','To entertain with a story','To give step-by-step instructions','To describe a place'],s:['The author takes a position and urges the school board to act — that is persuasion.'],h:'Is the author trying to convince the reader of something?'}]}
+];
+const genPassage=()=>{const P=pick(PASSAGES);const it=pick(P.qs);return mc(it.q,it.c,0,it.s,it.h,{visual:passageHTML(P)});};
+const passageHTML=P=>`<div class="passage"><div class="ptitle">${P.title}</div>${P.text}</div>`;
+
+/* ---------- test blueprints ---------- */
+const MATH_TOPICS=[
+ ['Exponents & roots',[genExponents,genSciNot,genRoots,asMC(genSimpRad)]],
+ ['Equations',[asMC(genLinEq),asMC(genSysElim),asMC(genSysSub),asMC(genSolveFactor),asMC(genProportion)]],
+ ['Functions & lines',[genFunc,asMC(genSlope),asMC(genEqTwo),asMC(genEqPointSlope),asMC(genPPSlope)]],
+ ['Percents, statistics & probability',[asMC(genPercent),asMC(genStats),asMC(genSampleProb),asMC(genCounting),asMC(genIndDep)]],
+ ['Geometry & measurement',[asMC(genPyth),asMC(genDist),asMC(genMid),asMC(genFindAngle),asMC(()=>genAlgebra(false)),asMC(genAngleSum),asMC(genExterior),asMC(genPolyAngles),asMC(genAreaPT),asMC(genAreaCirc),asMC(genVolPrism),asMC(genVolPyr),asMC(genSphere),asMC(genSimPoly),genTriIneq]],
+ ['Transformations',[asMC(genReflect),asMC(genRotate),asMC(genTranslate),asMC(genDilate),genIdentify]]
+];
+const ELA_TOPICS=[['Grammar & usage',GRAMMAR],['Punctuation',PUNCT],['Sentence structure',SENT],['Writing & revision',WRITING],['Vocabulary',VOCAB]];
+function buildTest(section,n){const qs=[];
+  if(section==='math'){const order=[];while(order.length<n)order.push(...shuffle(MATH_TOPICS.map((_,i)=>i)));const seen=new Set();
+    for(const ti of order.slice(0,n)){const [name,gens]=MATH_TOPICS[ti];let p=null;for(let k=0;k<20&&!p;k++){const g=pick(gens);let c=null;try{c=g();}catch(e){}if(c&&!seen.has(c.prompt)){p=c;seen.add(c.prompt);}}if(p){p.topic=name;qs.push(p);}}
+    return qs;}
+  const nPass=n>=30?2:1,perPass=n>=20?5:3;const ps=shuffle(PASSAGES).slice(0,nPass);
+  const pool=shuffle(ELA_TOPICS.flatMap(([name,items])=>items.map(it=>({name,it}))));const nOther=n-nPass*perPass;
+  const byTopic={};for(const x of pool){(byTopic[x.name]=byTopic[x.name]||[]).push(x);}const picked=[];let r=0;const names=Object.keys(byTopic);
+  while(picked.length<nOther&&names.some(k=>byTopic[k].length)){const k=names[r++%names.length];if(byTopic[k].length)picked.push(byTopic[k].pop());}
+  for(const {name,it} of picked){const p=mc(it.q,it.c,0,it.s,it.h);p.topic=name;qs.push(p);}
+  for(const P of ps){for(const it of shuffle(P.qs).slice(0,perPass)){const p=mc(it.q,it.c,0,it.s,it.h,{visual:passageHTML(P)});p.topic='Reading comprehension';p.passage=P.title;qs.push(p);}}
+  return qs;}
+
+UNITS.push({num:99,exam:true,title:'MCVSD Exam Prep',lessons:[
+L('M1','Exponents, Roots & Scientific Notation','8th-grade number skills that show up on the math section.',[
+  C('Exponent rules',`<table class="t"><tr><th>Rule</th><th>Example</th></tr><tr><td>Product: add exponents</td><td>x${sup(3)} · x${sup(4)} = x${sup(7)}</td></tr><tr><td>Quotient: subtract</td><td>x${sup(9)} ÷ x${sup(2)} = x${sup(7)}</td></tr><tr><td>Power of a power: multiply</td><td>(x${sup(3)})${sup(2)} = x${sup(6)}</td></tr><tr><td>Zero exponent</td><td>x${sup(0)} = 1</td></tr><tr><td>Negative exponent</td><td>x${sup(-2)} = ${fracH(1,'x²')}</td></tr></table><div class="box warn">A negative exponent does <b>not</b> make the number negative. 2${sup(-3)} = ${fracH(1,8)}.</div>`),
+  C('Scientific notation',`<p>a × 10${sup('n')} where 1 ≤ a &lt; 10.</p><ul><li>45,000,000 = 4.5 × 10${sup(7)}</li><li>0.00062 = 6.2 × 10${sup(-4)}</li></ul><p><b>Multiply:</b> multiply the fronts, add the exponents. <b>Divide:</b> divide the fronts, subtract the exponents. Then fix the front so it's between 1 and 10.</p>`),
+  C('Roots & irrational numbers',`<p>√49 = 7 because 7² = 49. ∛(${MINUS}27) = ${MINUS}3 because (${MINUS}3)³ = ${MINUS}27.</p><p><b>Estimate:</b> √50 is between 7 and 8 (49 and 64), very close to 7.</p><p><b>Irrational</b> numbers can't be written as fractions: √2, √15, π. Perfect-square roots like √36 are rational.</p>`)
+],[['Exponents',genExponents],['Scientific notation',genSciNot],['Roots & irrationals',genRoots]]),
+L('M2','Equations, Functions & Percents','Multi-step equations, functions, percents, and statistics.',[
+  C('Solving equations',`<ol><li>Distribute.</li><li>Combine like terms on each side.</li><li>Move the variable terms to one side.</li><li>Undo + / ${MINUS}, then × / ÷.</li></ol><p><b>How many solutions?</b> Same x-coefficient and same constant → infinitely many. Same x-coefficient, different constant → no solution. Otherwise → exactly one.</p>`),
+  C('Functions',`<p>A <b>function</b> gives each input exactly one output. A repeated x with two different y's → not a function.</p><p><b>Rate of change</b> (slope) = change in y ÷ change in x. The <b>initial value</b> is y when x = 0.</p>`),
+  C('Percents & statistics',`<ul><li>p% of n = (p ÷ 100) × n</li><li>Discount: pay (100 ${MINUS} p)%. Tax: pay (100 + p)%.</li><li>Percent change = change ÷ <b>original</b> × 100</li><li>Mean = sum ÷ count. Median = middle of the sorted list. Range = max ${MINUS} min. Mode = most frequent.</li></ul>`)
+],[['Linear equations',genLinEq],['Functions',genFunc],['Percents',genPercent],['Statistics',genStats]]),
+L('M3','Exam-Style Math (multiple choice)','Mixed multiple-choice questions from every math topic, like the real test.',[
+  C('Multiple-choice strategies',`<ul><li><b>Work it first</b>, then find your answer in the choices.</li><li><b>Plug in the choices</b> when solving is hard — especially for equations.</li><li><b>Eliminate</b> answers that are impossible (a negative length, an angle over 180°).</li><li><b>Estimate</b> to check: is the answer about the right size?</li><li><b>Watch the traps</b>: wrong answers are often what you get from a common mistake (sign error, forgetting to square, using the wrong formula).</li><li>Don't get stuck — skip, flag it, and come back.</li></ul>`)
+],MATH_TOPICS.map(([name,gens])=>[name,()=>{const g=pick(gens);return g();}])),
+L('E1','Grammar, Usage & Punctuation','Agreement, pronouns, commonly confused words, commas, and sentence structure.',[
+  C('Agreement & pronouns',`<ul><li>Cross out prepositional phrases to find the real subject: "The box <s>of photos</s> <b>is</b>…"</li><li>Each, everyone, nobody → singular.</li><li>Neither/nor, either/or → match the closer subject.</li><li>Subject pronouns: I, he, she, we, they. Object pronouns (after verbs and prepositions): me, him, her, us, them, whom.</li><li>Trick: drop the other person — "Maya and <b>me</b>" → "to me."</li></ul>`),
+  C('Commonly confused words',`<table class="t"><tr><td>its (possessive) / it's (it is)</td></tr><tr><td>their (owns) / there (place) / they're (they are)</td></tr><tr><td>affect (verb) / effect (noun)</td></tr><tr><td>than (compare) / then (time)</td></tr><tr><td>lie (rest) / lay (put down)</td></tr><tr><td>good (adjective) / well (adverb)</td></tr></table>`),
+  C('Punctuation',`<ul><li>Comma after an introductory phrase or clause.</li><li>Comma before FANBOYS (for, and, nor, but, or, yet, so) joining two sentences.</li><li>Never join two sentences with only a comma (comma splice).</li><li>Semicolon: joins two complete sentences, no "and."</li><li>Colon: after a complete sentence, before a list.</li><li>Commas around extra (non-essential) information.</li></ul>`),
+  C('Sentence structure',`<ul><li><b>Fragment</b>: missing a subject, verb, or complete thought ("Because it rained.").</li><li><b>Run-on</b>: two sentences with no punctuation between them.</li><li><b>Dangling modifier</b>: the opening phrase must describe the word right after the comma.</li><li><b>Parallel structure</b>: items in a list match in form.</li></ul>`)
+],[['Grammar & usage',bank(GRAMMAR)],['Punctuation',bank(PUNCT)],['Sentence structure',bank(SENT)]]),
+L('E2','Writing, Revision & Vocabulary','Transitions, topic sentences, word choice, and vocabulary in context.',[
+  C('Transitions',`<table class="t"><tr><th>Purpose</th><th>Words</th></tr><tr><td>Cause → effect</td><td>As a result, Therefore, Consequently</td></tr><tr><td>Contrast</td><td>However, Nevertheless, In contrast, On the other hand</td></tr><tr><td>Example</td><td>For example, For instance</td></tr><tr><td>Adding on</td><td>Furthermore, In addition, Also</td></tr><tr><td>Sequence</td><td>First, Next, Finally</td></tr></table><div class="box tip">Read the sentences on both sides of the blank and ask how they are related.</div>`),
+  C('Revising writing',`<ul><li><b>Topic sentence</b>: covers the whole paragraph's main idea.</li><li><b>Doesn't belong</b>: find the off-topic sentence.</li><li><b>Concise</b>: fewest words, same meaning, no repetition.</li><li><b>Formal tone</b>: no slang, no exclamation points in reports.</li><li><b>Best evidence</b>: specific and directly proves the claim.</li></ul>`),
+  C('Vocabulary in context',`<p>Use clues in the sentence: a definition, a synonym, an example, or a contrast ("but," "unlike").</p><p>Know common roots: <i>aqua</i> (water), <i>bio</i> (life), <i>geo</i> (earth), <i>sub-</i> (under), <i>-less</i> (without), <i>-ology</i> (study of).</p><div class="box tip">Plug your answer back into the sentence — it should make sense.</div>`)
+],[['Writing & revision',bank(WRITING)],['Vocabulary in context',bank(VOCAB)]]),
+L('E3','Reading Comprehension','Main idea, details, inference, vocabulary, structure, and author\'s purpose.',[
+  C('Reading strategy',`<ol><li>Skim the questions first so you know what to look for.</li><li>Read the passage once, actively — note the main idea of each paragraph.</li><li>For each question, <b>go back</b> to the passage and find proof.</li><li>Eliminate choices that are too extreme, off-topic, or not supported.</li></ol>`),
+  C('Question types',`<table class="t"><tr><th>Type</th><th>Ask yourself</th></tr><tr><td>Main idea</td><td>What is the whole passage about?</td></tr><tr><td>Detail</td><td>Where does it say this? (find the line)</td></tr><tr><td>Inference</td><td>What must be true, based on clues?</td></tr><tr><td>Vocabulary</td><td>What word could replace it in this sentence?</td></tr><tr><td>Structure</td><td>How is this paragraph organized?</td></tr><tr><td>Purpose / claim</td><td>Why did the author write this? What do they want me to believe?</td></tr></table>`)
+],[['Reading passages',genPassage]])
+]});
+
 /* ---------- explore ---------- */
 function renderExplore(){const LL=byId(S.lesson),el=document.getElementById('explore');if(!el)return;const E=S.ex[LL.id]||(S.ex[LL.id]={});
   const fn={pairs:exPairs,measures:exMeasures,converse:exConverse,slope:exSlope,eq:exEq,dist:exDist}[LL.explore];fn(el,E);}
@@ -2058,6 +2360,76 @@ function exDist(el,E){E.m??=2;E.b??=0;E.P??={x:0,y:5};const {m,b,P}=E;
 }
 
 
+/* ================= MCVSD EXAM: VIEWS ================= */
+const TEST_LEN=[['Quick',10,15],['Half',20,30],['Full',30,45]];
+let T=null, TIMER=null;
+function daysLeft(){const now=new Date();const a=new Date(now.getFullYear(),now.getMonth(),now.getDate());return Math.round((EXAM_DATE-a)/86400000);}
+function goExam(){S.view='exam';S.unit=99;S.lesson=null;setHash();render();window.scrollTo(0,0);}
+function examHist(){return store._exam||(store._exam=[]);}
+function examBanner(){const d=daysLeft();if(d<0)return '';
+  return `<button class="examban" data-exam="1"><span class="exd"><b>${d}</b>${d===1?'day':'days'}</span><span style="flex:1;text-align:left"><span class="t">MCVSD Career Academy entrance exam — ${EXAM_DATE_TXT}</span><span class="d" style="display:block">Timed practice tests in Math and Language Arts, topic drills, and a week-by-week study plan.</span></span><span class="btn" style="pointer-events:none">Exam prep →</span></button>`;}
+function studyPlan(){const start=new Date();start.setHours(0,0,0,0);const wk=[];const mon=new Date(start);const dow=(mon.getDay()+6)%7;mon.setDate(mon.getDate()-dow);
+  for(let d=new Date(mon);d<=EXAM_DATE;d.setDate(d.getDate()+7))wk.push(new Date(d));
+  const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const focus=[['Exponents, roots & scientific notation','Grammar & usage'],['Equations & functions','Punctuation & sentence structure'],['Geometry & measurement','Reading comprehension'],['Percents, statistics & probability','Writing, revision & vocabulary'],['Transformations + your weakest math topic','Reading comprehension']];
+  const n=wk.length;let fi=0;
+  return wk.map((w,i)=>{const end=new Date(w);end.setDate(end.getDate()+6);const last=i===n-1,first=i===0,penult=i===n-2&&n>2;
+    let plan;if(last)plan=`<b>Exam week — keep it light.</b> Review the Learn cards (exponent rules, formulas, comma rules). One Quick test per section early in the week. Sleep well Friday night; bring a photo ID on Saturday.`;
+    else if(first)plan=`<b>Baseline.</b> Take one <b>Full</b> Math test and one <b>Full</b> Language Arts test. Note your two weakest topics from the results page.`;
+    else if(penult)plan=`<b>Dress rehearsal.</b> Two Full tests per section under timed conditions. Review every missed question's solution.`;
+    else{const f=focus[fi++%focus.length];plan=`<b>Focus:</b> ${f[0]} (math) and ${f[1]} (language arts). Drill 15–20 minutes on school nights; one Half test per section on the weekend.`;}
+    const now=new Date();const cur=now>=w&&now<=new Date(end.getTime()+86399999);
+    return `<tr class="${cur?'curwk':''}"><td style="white-space:nowrap"><b>${fmt(w)} – ${fmt(end<EXAM_DATE?end:EXAM_DATE)}</b>${cur?'<br><span class="badge here">this week</span>':''}</td><td>${plan}</td></tr>`;}).join('');}
+function examView(){const d=daysLeft(),H=examHist();const U=EXAMU;
+  const best=s=>{const r=H.filter(x=>x.section===s&&x.n>=20);return r.length?Math.max(...r.map(x=>Math.round(x.c/x.n*100)))+'%':'—';};
+  return `<div class="lhead"><div><div class="code"><a href="#home" data-home="1">All units</a> › MCVSD Exam Prep</div><h1 style="margin:0">MCVSD Entrance Exam Prep</h1></div></div>
+  <div class="card countcard"><div class="bigd"><b>${Math.max(d,0)}</b><span>${d===1?'day':'days'} to go</span></div><div><h2 style="margin:0 0 4px">${EXAM_DATE_TXT}</h2>
+  <p class="muted" style="margin:0">The Career Academy exam has a <b>Math</b> part and a <b>Writing / Language Arts</b> part, each worth up to 35 of the 100 admission points, all multiple choice. MCVSD writes a new exam each year and doesn't publish practice tests — these are practice questions in a similar format, not real past questions.</p>
+  <p class="small" style="margin:8px 0 0">Best full-length score so far — Math: <b>${best('math')}</b> · Language Arts: <b>${best('ela')}</b></p></div></div>
+  <h2 style="margin-top:22px">Timed practice tests</h2>
+  <div class="lessons">${[['math','Math','Exponents & roots, equations, functions, percents & statistics, geometry, transformations'],['ela','Language Arts','Grammar, punctuation, sentence structure, revision, vocabulary, and reading passages']].map(([k,t,d])=>`<div class="lesson" style="cursor:default;flex-direction:column"><div><span class="t">${t}</span><span class="d" style="display:block">${d}</span></div>
+    <div class="seg" style="margin-top:10px">${TEST_LEN.map(([lab,n,m])=>`<button data-start="${k}" data-n="${n}" data-m="${m}">${lab} · ${n} Q · ${m} min</button>`).join('')}</div></div>`).join('')}</div>
+  <h2 style="margin-top:22px">Your scores</h2>${H.length?`<table class="t"><tr><th>Date</th><th>Section</th><th>Score</th><th>Time used</th></tr>${H.slice(-12).reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td><td>${x.section==='math'?'Math':'Language Arts'} (${x.n} Q)</td><td><b>${x.c}/${x.n}</b> (${Math.round(x.c/x.n*100)}%)</td><td>${Math.floor(x.sec/60)}:${String(x.sec%60).padStart(2,'0')}</td></tr>`).join('')}</table>`:'<p class="muted">No tests yet — start with a Full test in each section to get a baseline.</p>'}
+  <h2 style="margin-top:22px">Study plan to ${EXAM_DATE.toLocaleDateString('en-US',{month:'long',day:'numeric'})}</h2><table class="t">${studyPlan()}</table>
+  <h2 style="margin-top:22px">Topic drills</h2><p class="muted" style="margin-top:-4px">Learn cards plus unlimited practice with hints and step-by-step solutions. Geometry topics are also covered in the full course units.</p>
+  <div class="lessons">${U.lessons.map(l=>lessonTile(l,U)).join('')}</div>`;}
+function bindExam(){app.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startTest(b.dataset.start,+b.dataset.n,+b.dataset.m));}
+function startTest(section,n,mins){T={section,qs:buildTest(section,n),ans:{},flag:{},i:0,start:Date.now(),limit:mins*60,done:false,confirm:false,saved:false};S.view='test';setHash();render();window.scrollTo(0,0);}
+function stopTimer(){if(TIMER){clearInterval(TIMER);TIMER=null;}}
+function remaining(){return Math.max(0,T.limit-Math.floor((Date.now()-T.start)/1000));}
+const mmss=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+function testView(){if(!T)return examView();if(T.done)return resultsView();const q=T.qs[T.i],n=T.qs.length,ansd=Object.keys(T.ans).length;
+  return `<div class="testbar"><div><b>${T.section==='math'?'Math':'Language Arts'} practice test</b> · Question ${T.i+1} of ${n}</div><div class="timer" id="timer">${mmss(remaining())}</div><button class="btn" id="submitTest">Submit test</button></div>
+  ${T.confirm?`<div class="fb bad" style="margin-bottom:12px">You have ${n-ansd} unanswered question${n-ansd===1?'':'s'}. On the real test there is no penalty for guessing — fill them in! <button class="btn ghost" id="reallySubmit" style="margin-left:8px">Submit anyway</button></div>`:''}
+  <div class="card"><div class="${q.visual?'two':''}">${q.visual?`<div class="vis${q.passage?' pvis':''}">${q.visual}</div>`:''}<div><div class="skilltag">${q.topic}</div><div class="q">${q.prompt}</div>
+  <div class="choices">${q.choices.map((c,k)=>`<button class="choice${T.ans[T.i]===k?' sel':''}" data-pick="${k}"><span class="lt">${'ABCD'[k]}</span> ${c}</button>`).join('')}</div>
+  <div class="actions"><button class="btn ghost" id="prevQ" ${T.i===0?'disabled':''}>← Previous</button><button class="btn ghost" id="flagQ">${T.flag[T.i]?'⚑ Unflag':'⚐ Flag for review'}</button>${T.i<n-1?`<button class="btn" id="nextQ">Next →</button>`:`<button class="btn good" id="submitTest2">Finish & submit</button>`}</div></div></div></div>
+  <div class="navgrid">${T.qs.map((_,k)=>`<button class="${k===T.i?'cur':''} ${T.ans[k]!=null?'ans':''} ${T.flag[k]?'flg':''}" data-go="${k}">${k+1}</button>`).join('')}</div>
+  <p class="small muted">Answered ${ansd} of ${n}. ⚐ = flagged. Your answers aren't checked until you submit.</p>`;}
+function bindTest(){if(!T)return;if(T.done){bindResults();return;}
+  const q=id=>document.getElementById(id);stopTimer();TIMER=setInterval(()=>{const el=q('timer');const r=remaining();if(el){el.textContent=mmss(r);el.classList.toggle('low',r<=120);}if(r<=0){finishTest();}},1000);
+  app.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{T.ans[T.i]=+b.dataset.pick;rerender();});
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{T.i=+b.dataset.go;render();window.scrollTo(0,0);});
+  if(q('prevQ'))q('prevQ').onclick=()=>{T.i--;render();window.scrollTo(0,0);};
+  if(q('nextQ'))q('nextQ').onclick=()=>{T.i++;render();window.scrollTo(0,0);};
+  if(q('flagQ'))q('flagQ').onclick=()=>{T.flag[T.i]=!T.flag[T.i];rerender();};
+  const sub=()=>{const un=T.qs.length-Object.keys(T.ans).length;if(un>0&&!T.confirm){T.confirm=true;rerender();window.scrollTo(0,0);return;}finishTest();};
+  if(q('submitTest'))q('submitTest').onclick=sub;if(q('submitTest2'))q('submitTest2').onclick=sub;if(q('reallySubmit'))q('reallySubmit').onclick=finishTest;}
+function finishTest(){stopTimer();if(!T||T.done)return;T.done=true;T.sec=Math.min(T.limit,Math.floor((Date.now()-T.start)/1000));T.c=T.qs.filter((q,k)=>T.ans[k]===q.answer).length;
+  if(!T.saved){examHist().push({t:Date.now(),section:T.section,n:T.qs.length,c:T.c,sec:T.sec});T.saved=true;save();}render();window.scrollTo(0,0);}
+function resultsView(){const n=T.qs.length,pct=Math.round(T.c/n*100);const by={};T.qs.forEach((q,k)=>{const b=by[q.topic]||(by[q.topic]={c:0,n:0});b.n++;if(T.ans[k]===q.answer)b.c++;});
+  const rows=Object.entries(by).sort((a,b)=>a[1].c/a[1].n-b[1].c/b[1].n);const weak=rows.filter(([,b])=>b.c/b.n<0.7).map(([t])=>t);
+  const msg=pct>=90?'Excellent — keep this up with Full tests.':pct>=75?'Solid. Focus on your weakest topics below to push higher.':pct>=60?'Good start. Drill the topics below, then retest.':'This is a baseline — use the topic drills below and retest next week.';
+  return `<div class="lhead"><div><div class="code"><a href="#exam" data-exam="1">MCVSD Exam Prep</a> › Results</div><h1 style="margin:0">${T.section==='math'?'Math':'Language Arts'} test results</h1></div></div>
+  <div class="card countcard"><div class="bigd"><b>${pct}%</b><span>${T.c} of ${n} correct</span></div><div><h2 style="margin:0 0 4px">${msg}</h2><p class="muted" style="margin:0">Time used: ${mmss(T.sec)} of ${mmss(T.limit)}.${weak.length?` Work on: <b>${weak.join(', ')}</b>.`:''}</p>
+  <div class="actions"><button class="btn" data-start="${T.section}" data-n="${n}" data-m="${T.limit/60}">Take another ${n}-question test</button><button class="btn ghost" data-exam="1">Back to exam prep</button></div></div></div>
+  <h2 style="margin-top:20px">By topic</h2><table class="t">${rows.map(([t,b])=>`<tr><td>${t}</td><td style="width:45%"><div class="meter" style="margin:0"><i style="width:${Math.round(b.c/b.n*100)}%;background:${b.c/b.n>=0.7?'var(--good)':b.c/b.n>=0.5?'#e0a100':'var(--bad)'}"></i></div></td><td style="white-space:nowrap"><b>${b.c}/${b.n}</b></td></tr>`).join('')}</table>
+  <h2 style="margin-top:20px">Review every question</h2><p class="muted" style="margin-top:-4px">Tap a question to see the choices and the full solution. Missed questions are listed first.</p>
+  ${T.qs.map((q,k)=>({q,k})).sort((a,b)=>(T.ans[a.k]===a.q.answer)-(T.ans[b.k]===b.q.answer)||a.k-b.k).map(({q,k})=>{const ok=T.ans[k]===q.answer;return `<details class="rev ${ok?'ok':'no'}"><summary><span class="mark">${ok?'✓':'✗'}</span> Question ${k+1} · ${q.topic}${T.ans[k]==null?' · <i>no answer</i>':''}</summary>
+    <div class="${q.visual?'two':''}" style="margin-top:10px">${q.visual?`<div class="vis${q.passage?' pvis':''}">${q.visual}</div>`:''}<div><div class="q">${q.prompt}</div><div class="choices">${q.choices.map((c,i)=>`<div class="choice ${i===q.answer?'right':i===T.ans[k]?'wrong':''}"><span class="lt">${'ABCD'[i]}</span> ${c}${i===q.answer?' <b>✓ correct</b>':i===T.ans[k]?' <b>✗ your answer</b>':''}</div>`).join('')}</div>
+    <div class="steps"><b>Solution</b><ol>${q.steps.map(s=>`<li>${s}</li>`).join('')}</ol></div></div></div></details>`;}).join('')}`;}
+function bindResults(){bindExam();}
+
 /* ================= COURSE INDEX ================= */
 UNITS.sort((a,b)=>a.num-b.num);
 const LESSON_IDX={};      // id -> lesson
@@ -2068,6 +2440,7 @@ for(const U of UNITS){U.lessons=U.lessons.map(l=>typeof l==='string'?LESSON_IDX[
     skills:U.lessons.flatMap(l=>l.skills.map(s=>({...s,id:l.id+'_'+s.id,name:l.code+' · '+s.name})))};
   LESSON_IDX[U.mix.id]=U.mix;HOME_UNIT[U.mix.id]=U.num;}
 const CURRENT='3-5', CURRENT_UNIT=3;
+const COURSE=UNITS.filter(u=>!u.exam), EXAMU=UNITS.find(u=>u.exam);
 const unitOf=(id,pref)=>{const n=pref??HOME_UNIT[id];return UNITS.find(u=>u.num===n);};
 
 /* ================= STATE & STORAGE ================= */
@@ -2082,13 +2455,14 @@ const app=document.getElementById('app');
 const byId=id=>LESSON_IDX[id];
 const tabsFor=l=>l.cards.length?['learn',...(l.explore?['explore']:[]),'practice']:['practice'];
 
-function setHash(){try{const h=S.view==='home'?'home':S.view==='unit'?`unit-${S.unit}`:`lesson-${S.lesson}-${S.tab}-u${S.unit}`;if(location.hash!=='#'+h)history.replaceState(null,'','#'+h);}catch(e){}}
+function setHash(){try{const h=S.view==='home'?'home':S.view==='exam'||S.view==='test'?'exam':S.view==='unit'?`unit-${S.unit}`:`lesson-${S.lesson}-${S.tab}-u${S.unit}`;if(location.hash!=='#'+h)history.replaceState(null,'','#'+h);}catch(e){}}
 function goHome(){S.view='home';S.unit=null;S.lesson=null;setHash();render();window.scrollTo(0,0);}
 function goUnit(n){S.view='unit';S.unit=n;S.lesson=null;setHash();render();window.scrollTo(0,0);}
 function goLesson(id,tab,unit){const l=byId(id);const changed=S.lesson!==id;S.view='lesson';S.lesson=id;S.unit=unit??(S.unit!=null&&UNITS.find(u=>u.num===S.unit)?.lessons.includes(l)?S.unit:HOME_UNIT[id]);
   const tabs=tabsFor(l);S.tab=tabs.includes(tab)?tab:tabs[0];if(changed){S.skill='all';S.prob=null;}setHash();render();window.scrollTo(0,0);}
 function fromHash(){const h=(location.hash||'').slice(1);let m;
-  if((m=h.match(/^unit-(\d+)$/))&&UNITS.find(u=>u.num===+m[1])){S.view='unit';S.unit=+m[1];S.lesson=null;return;}
+  if(h==='exam'){if(S.view!=='test')S.view='exam';return;}
+  if((m=h.match(/^unit-(\d+)$/))&&COURSE.find(u=>u.num===+m[1])){S.view='unit';S.unit=+m[1];S.lesson=null;return;}
   if((m=h.match(/^lesson-([\w-]+?)-(learn|explore|practice)(?:-u(\d+))?$/))&&byId(m[1])){const l=byId(m[1]);const was=S.lesson;S.view='lesson';S.lesson=m[1];S.unit=m[3]!=null?+m[3]:HOME_UNIT[m[1]];const t=tabsFor(l);S.tab=t.includes(m[2])?m[2]:t[0];if(was!==m[1]){S.prob=null;S.skill='all';}return;}
   S.view='home';}
 window.addEventListener('hashchange',()=>{fromHash();render();});
@@ -2096,11 +2470,12 @@ window.addEventListener('hashchange',()=>{fromHash();render();});
 /* ================= RENDER ================= */
 const LOGO=`<svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 8h18M3 16h18" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><path d="M8 22L16 2" stroke="#f2711c" stroke-width="2.2" stroke-linecap="round"/></svg>`;
 function header(){return `<header class="top"><button class="brand" data-home="1"><span class="logo">${LOGO}</span>Geometry Coach</button>
-  <nav class="pills" aria-label="Units">${UNITS.map(u=>`<button class="pill${S.unit===u.num&&S.view!=='home'?' on':''}${u.num===CURRENT_UNIT&&S.unit!==u.num?' here':''}" data-unit="${u.num}" title="Unit ${u.num}: ${u.title}">U${u.num}</button>`).join('')}</nav></header>`;}
+  <nav class="pills" aria-label="Units"><button class="pill exampill${S.view==='exam'||S.view==='test'||(S.unit===99&&S.view==='lesson')?' on':''}" data-exam="1">MCVSD Exam</button>${COURSE.map(u=>`<button class="pill${S.unit===u.num&&S.view!=='home'?' on':''}${u.num===CURRENT_UNIT&&S.unit!==u.num?' here':''}" data-unit="${u.num}" title="Unit ${u.num}: ${u.title}">U${u.num}</button>`).join('')}</nav></header>`;}
 function render(){
   let h=header();
-  if(S.view==='home')h+=homeView();else if(S.view==='unit')h+=unitView();else h+=lessonView();
-  h+=`<div class="foot">Built from the Edison Township Geometry 8 curriculum (approved Sept 30, 2024) · ${UNITS.length} units · ${Object.keys(LESSON_IDX).filter(k=>!k.startsWith('mix')).length} lessons</div>`;
+  if(S.view!=='test')stopTimer();
+  if(S.view==='home')h+=homeView();else if(S.view==='exam')h+=examView();else if(S.view==='test')h+=testView();else if(S.view==='unit')h+=unitView();else h+=lessonView();
+  h+=`<div class="foot">Built from the Edison Township Geometry 8 curriculum (approved Sept 30, 2024) · ${COURSE.length} units · ${COURSE.reduce((n,u)=>n+u.lessons.length,0)} lessons + MCVSD exam prep</div>`;
   app.innerHTML=h;bind();
 }
 function unitStats(U){let m=0,solved=0;for(const l of U.lessons){const p=prog(l.id);solved+=p.c;if(p.c>=GOAL)m++;}return {m,solved,n:U.lessons.length};}
@@ -2110,7 +2485,7 @@ function homeView(){
   <p class="muted">Every lesson has short <b>Learn</b> cards with pictures and worked examples, then <b>Practice</b> with brand-new problems every time, hints, and full step-by-step solutions. Unit 3 also has <b>Explore</b> playgrounds.</p>
   <div class="actions"><button class="btn" data-lesson="${CURRENT}" data-u="${CURRENT_UNIT}">Continue with ${cur.code}: ${cur.title} →</button></div></div>
   <div class="vis">${tDiagram({theta:62,arrows:true,hl:hl2(3,6),labels:{3:'62°',6:'62°'}})}</div></section>
-  <h2>Units</h2><div class="lessons">${UNITS.map(unitTile).join('')}</div>`;
+  ${examBanner()}<h2>Units</h2><div class="lessons">${COURSE.map(unitTile).join('')}</div>`;
 }
 function unitTile(U){const st=unitStats(U),pct=Math.round(st.m/st.n*100),cur=U.num===CURRENT_UNIT;
   return `<button class="lesson${cur?' current':''}" data-unit="${U.num}"><span class="code">${U.num}</span><span style="flex:1"><span class="t">${U.title}</span>
@@ -2129,9 +2504,10 @@ function lessonTile(l,U){const p=prog(l.id),pct=Math.min(100,Math.round(p.c/GOAL
 function lessonView(){
   const l=byId(S.lesson),U=UNITS.find(u=>u.num===S.unit)||unitOf(l.id);const tabs=tabsFor(l);if(!tabs.includes(S.tab))S.tab=tabs[0];
   const lab=t=>t==='learn'?'Learn':t==='explore'?'Explore':'Practice';
-  let h=`<div class="lhead"><div><div class="code"><a href="#home" data-home="1">All units</a> › <a href="#unit-${U.num}" data-unit="${U.num}">Unit ${U.num}: ${U.title}</a>${l.id===CURRENT?' · you are here':''}</div><h1 style="margin:0">${l.code==='Mix'?'':l.code+' '}${l.title}</h1></div>
+  const crumb=U.exam?`<a href="#exam" data-exam="1">MCVSD Exam Prep</a>`:`<a href="#unit-${U.num}" data-unit="${U.num}">Unit ${U.num}: ${U.title}</a>`;
+  let h=`<div class="lhead"><div><div class="code"><a href="#home" data-home="1">All units</a> › ${crumb}${l.id===CURRENT?' · you are here':''}</div><h1 style="margin:0">${l.code==='Mix'||U.exam?'':l.code+' '}${l.title}</h1></div>
    <div class="tabs">${tabs.map((t,i)=>`<button class="tab${S.tab===t?' on':''}" data-tab="${t}">${tabs.length>1?(i+1)+' · ':''}${lab(t)}</button>`).join('')}</div></div>
-   <div class="seg lessonpills">${U.lessons.map(x=>`<button class="${x.id===l.id?'on':''}" data-lesson="${x.id}" data-u="${U.num}">${x.code}</button>`).join('')}<button class="${U.mix.id===l.id?'on':''}" data-lesson="${U.mix.id}" data-u="${U.num}">Mix</button></div>`;
+   <div class="seg lessonpills">${U.lessons.map(x=>`<button class="${x.id===l.id?'on':''}" data-lesson="${x.id}" data-u="${U.num}">${U.exam?x.title.split(/[,&(]/)[0].trim():x.code}</button>`).join('')}${U.exam?'':`<button class="${U.mix.id===l.id?'on':''}" data-lesson="${U.mix.id}" data-u="${U.num}">Mix</button>`}</div>`;
   if(S.tab==='learn')h+=learnView(l);else if(S.tab==='explore')h+=`<div class="card" id="explore"></div>`;else h+=practiceView(l);
   return h;
 }
@@ -2196,6 +2572,8 @@ function saveVals(){const pr=S.prob;if(S.done)return;
 function bind(){
   app.querySelectorAll('[data-home]').forEach(b=>b.onclick=e=>{e.preventDefault();goHome();});
   app.querySelectorAll('[data-unit]').forEach(b=>b.onclick=e=>{e.preventDefault();goUnit(+b.dataset.unit);});
+  app.querySelectorAll('[data-exam]').forEach(b=>b.onclick=e=>{e.preventDefault();goExam();});
+  if(S.view==='exam')bindExam();if(S.view==='test')bindTest();
   app.querySelectorAll('[data-lesson]').forEach(b=>b.onclick=()=>{const id=b.dataset.lesson;goLesson(id,id===S.lesson?S.tab:'learn',b.dataset.u!=null?+b.dataset.u:undefined);});
   app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>goLesson(S.lesson,b.dataset.tab,S.unit));
   app.querySelectorAll('[data-card]').forEach(b=>b.onclick=()=>{S.card[S.lesson]=+b.dataset.card;render();window.scrollTo(0,0);});
