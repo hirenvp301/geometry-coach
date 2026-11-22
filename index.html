@@ -154,6 +154,8 @@ svg text{font-family:Lexend,system-ui,sans-serif}
 .bigd{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;height:110px;border-radius:14px;background:var(--a);color:#fff}
 .bigd b{font-size:40px;line-height:1}.bigd span{font-size:13px;margin-top:4px;text-align:center}
 .baseline{margin-top:18px;border:2px solid var(--a);background:#fff8f1}
+.pickcard summary{cursor:pointer}
+.pk{display:flex;gap:8px;align-items:center;font-size:14.5px;margin:6px 0;cursor:pointer}
 .curwk td{background:#fff6ec}
 .testbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;background:var(--bg);padding:10px 0;margin-bottom:10px;border-bottom:1px solid var(--line)}
 .testbar>div:first-child{flex:1}
@@ -2674,6 +2676,11 @@ function examView(){const d=daysLeft(),H=examHist();const U=EXAMU;
   <p class="muted" style="margin:0">Two sections — <b>Math</b> and <b>Language Arts</b> — about <b>40 multiple-choice questions in 60 minutes</b> each, based on NJ standards for grades 6–8. Each section is worth up to 35 of the 100 admission points (grades count for the other 30; 75 qualifies). MCVSD writes a new exam each year and doesn't publish practice tests, so these are practice questions in a similar format, not real past questions.</p>
   <p class="small" style="margin:8px 0 0">Best full-length score so far — Math: <b>${best('math')}</b> · Language Arts: <b>${best('ela')}</b></p></div></div>
   ${(()=>{const done=s=>H.some(x=>x.section===s&&x.n>=40);if(done('math')&&done('ela'))return '';return `<div class="card baseline"><h2 style="margin:0 0 4px">Step 1: Take the baseline tests</h2><p class="muted" style="margin:0 0 10px">Start with one full-length test in each section — 40 questions, 60 minutes, just like the real exam. The results page shows which topics to work on first.</p><div class="actions" style="margin-top:0">${done('math')?'<span class="badge done">Math baseline done ✓</span>':'<button class="btn" data-start="math" data-n="40" data-m="60">Start Math baseline (40 Q · 60 min)</button>'}${done('ela')?'<span class="badge done">Language Arts baseline done ✓</span>':'<button class="btn" data-start="ela" data-n="40" data-m="60">Start Language Arts baseline (40 Q · 60 min)</button>'}</div></div>`;})()}
+  ${store._weak&&LESSON_IDX.weak?`<div class="card baseline" style="border-color:var(--good);background:#f1faf4"><h2 style="margin:0 0 4px">🎯 Your weak topics</h2><p class="muted" style="margin:0 0 10px">${store._weak.sec?'Topics you picked on':`From your ${store._weak.section==='math'?'Math':'Language Arts'} test on`} ${new Date(store._weak.at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}: <b>${store._weak.topics.join(', ')}</b>.</p><button class="btn good" data-lesson="weak" data-u="99">Practice my weak topics →</button> <span class="small muted">&nbsp;${prog('weak').c} solved so far</span></div>`:''}
+  <details class="card pickcard" style="margin-top:14px"><summary><b>🎯 Pick my own topics to practice</b> <span class="muted small">— choose any topics, e.g. the ones missed on an earlier test</span></summary>
+   <div class="two" style="margin-top:10px"><div><b>Math</b>${MATH_TOPICS.map(t=>`<label class="pk"><input type="checkbox" data-pk="math" value="${t[0]}"> ${t[0]}</label>`).join('')}</div>
+   <div><b>Language Arts</b>${[...ELA_TOPICS.map(t=>t[0]),'Reading comprehension','Paired passages'].map(n=>`<label class="pk"><input type="checkbox" data-pk="ela" value="${n}"> ${n}</label>`).join('')}</div></div>
+   <div class="actions"><button class="btn good" id="pickGo">Practice selected topics →</button><span class="small muted" id="pickMsg"></span></div></details>
   <h2 style="margin-top:22px">Timed practice tests</h2>
   <div class="lessons">${[['math','Math','Number sense & proportional reasoning, algebraic reasoning, geometry & spatial reasoning'],['ela','Language Arts','Reading (single and paired passages), grammar, punctuation, spelling, vocabulary, and verbal reasoning']].map(([k,t,d])=>`<div class="lesson" style="cursor:default;flex-direction:column"><div><span class="t">${t}</span><span class="d" style="display:block">${d}</span></div>
     <div class="seg" style="margin-top:10px">${TEST_LEN.map(([lab,n,m])=>`<button data-start="${k}" data-n="${n}" data-m="${m}">${lab} · ${n} Q · ${m} min</button>`).join('')}</div></div>`).join('')}</div>
@@ -2681,7 +2688,9 @@ function examView(){const d=daysLeft(),H=examHist();const U=EXAMU;
   <h2 style="margin-top:22px">Study plan to ${EXAM_DATE.toLocaleDateString('en-US',{month:'long',day:'numeric'})}</h2><table class="t">${studyPlan()}</table>
   <h2 style="margin-top:22px">Topic drills</h2><p class="muted" style="margin-top:-4px">Learn cards plus unlimited practice with hints and step-by-step solutions. Geometry topics are also covered in the full course units.</p>
   <div class="lessons">${U.lessons.map(l=>lessonTile(l,U)).join('')}</div>`;}
-function bindExam(){app.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startTest(b.dataset.start,+b.dataset.n,+b.dataset.m));}
+function bindExam(){app.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startTest(b.dataset.start,+b.dataset.n,+b.dataset.m));
+  const g=document.getElementById('pickGo');if(g)g.onclick=()=>{const sel=[...app.querySelectorAll('[data-pk]:checked')];if(!sel.length){document.getElementById('pickMsg').textContent='Tick at least one topic.';return;}
+    const secs=[...new Set(sel.map(x=>x.dataset.pk))];const topics=sel.map(x=>x.value);store._weak={section:secs.length>1?'mixed':secs[0],topics,sec:Object.fromEntries(sel.map(x=>[x.value,x.dataset.pk])),at:Date.now()};delete store.weak;save();makeWeakLesson(store._weak);S.prob=null;S.skill='all';goLesson('weak','practice',99);};}
 function startTest(section,n,mins){T={section,qs:buildTest(section,n),ans:{},flag:{},i:0,start:Date.now(),limit:mins*60,done:false,confirm:false,saved:false};S.view='test';setHash();render();window.scrollTo(0,0);}
 function stopTimer(){if(TIMER){clearInterval(TIMER);TIMER=null;}}
 function remaining(){return Math.max(0,T.limit-Math.floor((Date.now()-T.start)/1000));}
@@ -2710,13 +2719,26 @@ function resultsView(){const n=T.qs.length,pct=Math.round(T.c/n*100);const by={}
   const msg=pct>=90?'Excellent — keep this up with Full tests.':pct>=75?'Solid. Focus on your weakest topics below to push higher.':pct>=60?'Good start. Drill the topics below, then retest.':'This is a baseline — use the topic drills below and retest next week.';
   return `<div class="lhead"><div><div class="code"><a href="#exam" data-exam="1">MCVSD Exam Prep</a> › Results</div><h1 style="margin:0">${T.section==='math'?'Math':'Language Arts'} test results</h1></div></div>
   <div class="card countcard"><div class="bigd"><b>${pct}%</b><span>${T.c} of ${n} correct</span></div><div><h2 style="margin:0 0 4px">${msg}</h2><p class="muted" style="margin:0">Time used: ${mmss(T.sec)} of ${mmss(T.limit)}.${weak.length?` Work on: <b>${weak.join(', ')}</b>.`:''}</p>
-  <div class="actions"><button class="btn" data-start="${T.section}" data-n="${n}" data-m="${T.limit/60}">Take another ${n}-question test</button><button class="btn ghost" data-exam="1">Back to exam prep</button></div></div></div>
+  <div class="actions"><button class="btn" data-start="${T.section}" data-n="${n}" data-m="${T.limit/60}">Take another ${n}-question test</button>${weakFromTest().length?`<button class="btn good" id="practiceWeak">🎯 Practice my weak topics</button>`:''}<button class="btn ghost" data-exam="1">Back to exam prep</button></div>${weakFromTest().length?`<p class="small muted" style="margin:8px 0 0">Weak-topic practice covers: ${weakFromTest().join(', ')} — one question at a time, with hints and full solutions.</p>`:''}</div></div>
   <h2 style="margin-top:20px">By topic</h2><table class="t">${rows.map(([t,b])=>`<tr><td>${t}</td><td style="width:45%"><div class="meter" style="margin:0"><i style="width:${Math.round(b.c/b.n*100)}%;background:${b.c/b.n>=0.7?'var(--good)':b.c/b.n>=0.5?'#e0a100':'var(--bad)'}"></i></div></td><td style="white-space:nowrap"><b>${b.c}/${b.n}</b></td></tr>`).join('')}</table>
   <h2 style="margin-top:20px">Review every question</h2><p class="muted" style="margin-top:-4px">Tap a question to see the choices and the full solution. Missed questions are listed first.</p>
   ${T.qs.map((q,k)=>({q,k})).sort((a,b)=>(T.ans[a.k]===a.q.answer)-(T.ans[b.k]===b.q.answer)||a.k-b.k).map(({q,k})=>{const ok=T.ans[k]===q.answer;return `<details class="rev ${ok?'ok':'no'}"><summary><span class="mark">${ok?'✓':'✗'}</span> Question ${k+1} · ${q.topic}${T.ans[k]==null?' · <i>no answer</i>':''}</summary>
     <div class="${q.visual?'two':''}" style="margin-top:10px">${q.visual?`<div class="vis${q.passage?' pvis':''}">${q.visual}</div>`:''}<div><div class="q">${q.prompt}</div><div class="choices">${q.choices.map((c,i)=>`<div class="choice ${i===q.answer?'right':i===T.ans[k]?'wrong':''}"><span class="lt">${'ABCD'[i]}</span> ${c}${i===q.answer?' <b>✓ correct</b>':i===T.ans[k]?' <b>✗ your answer</b>':''}</div>`).join('')}</div>
     <div class="steps"><b>Solution</b><ol>${q.steps.map(s=>`<li>${s}</li>`).join('')}</ol></div></div></div></details>`;}).join('')}`;}
-function bindResults(){bindExam();}
+function bindResults(){bindExam();const b=document.getElementById('practiceWeak');if(b)b.onclick=startWeak;}
+
+/* ---------- weak-topic practice ---------- */
+function weakGen(section,name){
+  if(section==='math'){const t=MATH_TOPICS.find(x=>x[0]===name);return t?()=>pick(t[2])():null;}
+  if(name==='Reading comprehension')return genPassage;if(name==='Paired passages')return genPair;
+  const t=ELA_TOPICS.find(x=>x[0]===name);return t?bank(t[1]):null;}
+function makeWeakLesson(w){const skills=w.topics.map(n=>[n,weakGen(w.sec?w.sec[n]:w.section,n)]).filter(x=>x[1]);if(!skills.length)return null;
+  const l=L('Weak','My weak topics',`Targeted ${w.section==='math'?'math':w.section==='ela'?'language arts':''} practice from ${w.sec?'topics you picked on':'your test on'} ${new Date(w.at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}: ${w.topics.join(', ')}.`,[],skills);l.id='weak';
+  LESSON_IDX.weak=l;HOME_UNIT.weak=99;return l;}
+function initWeak(){if(store._weak)makeWeakLesson(store._weak);}
+function weakFromTest(){const by={};T.qs.forEach((q,k)=>{const b=by[q.topic]||(by[q.topic]={c:0,n:0});b.n++;if(T.ans[k]===q.answer)b.c++;});
+  return Object.entries(by).filter(([,b])=>b.c<b.n).sort((a,b)=>a[1].c/a[1].n-b[1].c/b[1].n).map(([t])=>t).slice(0,6);}
+function startWeak(){const topics=weakFromTest();if(!topics.length)return;store._weak={section:T.section,topics,at:Date.now()};delete store.weak;save();makeWeakLesson(store._weak);S.prob=null;S.skill='all';goLesson('weak','practice',99);}
 
 /* ================= COURSE INDEX ================= */
 UNITS.sort((a,b)=>a.num-b.num);
@@ -2753,7 +2775,8 @@ function fromHash(){const h=(location.hash||'').slice(1);let m;
   if((m=h.match(/^unit-(\d+)$/))&&COURSE.find(u=>u.num===+m[1])){S.view='unit';S.unit=+m[1];S.lesson=null;return;}
   if((m=h.match(/^lesson-([\w-]+?)-(learn|explore|practice)(?:-u(\d+))?$/))&&byId(m[1])){const l=byId(m[1]);const was=S.lesson;S.view='lesson';S.lesson=m[1];S.unit=m[3]!=null?+m[3]:HOME_UNIT[m[1]];const t=tabsFor(l);S.tab=t.includes(m[2])?m[2]:t[0];if(was!==m[1]){S.prob=null;S.skill='all';}return;}
   S.view='home';}
-window.addEventListener('hashchange',()=>{fromHash();render();});
+window.addEventListener('hashchange',()=>{if(typeof initWeak==='function')initWeak();
+fromHash();render();});
 
 /* ================= RENDER ================= */
 const LOGO=`<svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 8h18M3 16h18" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><path d="M8 22L16 2" stroke="#f2711c" stroke-width="2.2" stroke-linecap="round"/></svg>`;
@@ -2880,6 +2903,7 @@ function bind(){
     app.querySelectorAll('#ans,[data-f]').forEach(inp=>inp.onkeydown=e=>{if(e.key==='Enter'&&!S.done)doCheck();});
   }
 }
+if(typeof initWeak==='function')initWeak();
 fromHash();render();
 
 </script>
