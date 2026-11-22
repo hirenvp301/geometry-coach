@@ -153,6 +153,7 @@ svg text{font-family:Lexend,system-ui,sans-serif}
 .countcard{display:flex;gap:20px;align-items:center}
 .bigd{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;height:110px;border-radius:14px;background:var(--a);color:#fff}
 .bigd b{font-size:40px;line-height:1}.bigd span{font-size:13px;margin-top:4px;text-align:center}
+.baseline{margin-top:18px;border:2px solid var(--a);background:#fff8f1}
 .curwk td{background:#fff6ec}
 .testbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;background:var(--bg);padding:10px 0;margin-bottom:10px;border-bottom:1px solid var(--line)}
 .testbar>div:first-child{flex:1}
@@ -2672,6 +2673,7 @@ function examView(){const d=daysLeft(),H=examHist();const U=EXAMU;
   <div class="card countcard"><div class="bigd"><b>${Math.max(d,0)}</b><span>${d===1?'day':'days'} to go</span></div><div><h2 style="margin:0 0 4px">${EXAM_DATE_TXT}</h2>
   <p class="muted" style="margin:0">Two sections — <b>Math</b> and <b>Language Arts</b> — about <b>40 multiple-choice questions in 60 minutes</b> each, based on NJ standards for grades 6–8. Each section is worth up to 35 of the 100 admission points (grades count for the other 30; 75 qualifies). MCVSD writes a new exam each year and doesn't publish practice tests, so these are practice questions in a similar format, not real past questions.</p>
   <p class="small" style="margin:8px 0 0">Best full-length score so far — Math: <b>${best('math')}</b> · Language Arts: <b>${best('ela')}</b></p></div></div>
+  ${(()=>{const done=s=>H.some(x=>x.section===s&&x.n>=40);if(done('math')&&done('ela'))return '';return `<div class="card baseline"><h2 style="margin:0 0 4px">Step 1: Take the baseline tests</h2><p class="muted" style="margin:0 0 10px">Start with one full-length test in each section — 40 questions, 60 minutes, just like the real exam. The results page shows which topics to work on first.</p><div class="actions" style="margin-top:0">${done('math')?'<span class="badge done">Math baseline done ✓</span>':'<button class="btn" data-start="math" data-n="40" data-m="60">Start Math baseline (40 Q · 60 min)</button>'}${done('ela')?'<span class="badge done">Language Arts baseline done ✓</span>':'<button class="btn" data-start="ela" data-n="40" data-m="60">Start Language Arts baseline (40 Q · 60 min)</button>'}</div></div>`;})()}
   <h2 style="margin-top:22px">Timed practice tests</h2>
   <div class="lessons">${[['math','Math','Number sense & proportional reasoning, algebraic reasoning, geometry & spatial reasoning'],['ela','Language Arts','Reading (single and paired passages), grammar, punctuation, spelling, vocabulary, and verbal reasoning']].map(([k,t,d])=>`<div class="lesson" style="cursor:default;flex-direction:column"><div><span class="t">${t}</span><span class="d" style="display:block">${d}</span></div>
     <div class="seg" style="margin-top:10px">${TEST_LEN.map(([lab,n,m])=>`<button data-start="${k}" data-n="${n}" data-m="${m}">${lab} · ${n} Q · ${m} min</button>`).join('')}</div></div>`).join('')}</div>
